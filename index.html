@@ -163,7 +163,7 @@
 
     .create-tile .art-bg {
       background:
-        radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.22) 1px, transparent 1px),
         linear-gradient(180deg, #161224, #0a0811);
       background-size: 18px 18px, 100% 100%;
     }
@@ -198,7 +198,7 @@
       justify-content: space-around;
       padding: 0 8px;
       z-index: 50;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.65);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
     }
 
     .dock-btn {
@@ -215,8 +215,8 @@
     }
     .dock-btn.active {
       color: #fff;
-      border-color: rgba(255,255,255,0.55);
-      background: rgba(255,255,255,0.05);
+      border-color: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.05);
     }
     .dock-plus {
       width: 42px;
@@ -406,7 +406,7 @@
       width: 38px;
       height: 4px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       margin: 0 auto 12px auto;
     }
     .sheet h3 { margin: 0 0 14px 0; font-size: 18px; }
@@ -597,7 +597,6 @@
       const grid = document.getElementById("catalog-grid");
       grid.innerHTML = "";
 
-      // Карточка «Ваш персонаж»
       const createCard = document.createElement("div");
       createCard.className = "char-tile create-tile";
       createCard.onclick = openCreateSheet;
@@ -687,7 +686,6 @@
       inp.value = "";
       pushMsg("user", txt);
 
-      // Локальный fallback-ответ, пока не подключен твой сервер/API
       const reply = `*${currentChar.name} реагирует на твои слова (${settings.style}, ${settings.pov}).* Принято: «${txt}». Подключи бэкенд OpenRouter для живых ответов ИИ.`;
       setTimeout(() => pushMsg("bot", reply), 250);
     }
