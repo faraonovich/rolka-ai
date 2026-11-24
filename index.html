@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void RP Mini App</title>
+  <title>Void RP</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-dark: #090412;
-      --bg-glow-1: rgba(139, 92, 246, 0.28);
-      --bg-glow-2: rgba(192, 38, 211, 0.18);
-      --glass: rgba(24, 14, 43, 0.58);
-      --glass-strong: rgba(34, 19, 61, 0.78);
-      --border: rgba(168, 85, 247, 0.28);
+      --bg: #07060b;
+      --surface: #13111c;
+      --surface-2: #1c1929;
+      --border: rgba(255, 255, 255, 0.08);
       --accent: #a855f7;
-      --accent-bright: #c084fc;
-      --text: #f5f3ff;
-      --muted: #a79bc4;
+      --accent-2: #9333ea;
+      --text: #f4f2f8;
+      --muted: #8e899e;
     }
 
     * {
       box-sizing: border-box;
+      outline: none;
       -webkit-tap-highlight-color: transparent;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -28,438 +27,767 @@
     body {
       margin: 0;
       min-height: 100vh;
-      color: var(--text);
       background:
-        radial-gradient(circle at 15% 15%, var(--bg-glow-1), transparent 45%),
-        radial-gradient(circle at 85% 75%, var(--bg-glow-2), transparent 45%),
-        linear-gradient(160deg, #07030e 0%, #120724 55%, #090412 100%);
-      padding: 16px 14px 96px 14px;
-      overflow-x: hidden;
+        radial-gradient(circle at 20% 0%, rgba(147, 51, 234, 0.16), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      padding: 12px 12px 92px 12px;
     }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
+    .screen { display: none; }
+    .screen.active { display: block; animation: fade .18s ease; }
 
-    .title {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      background: linear-gradient(90deg, #fff, var(--accent-bright));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(168, 85, 247, 0.16);
-      border: 1px solid var(--border);
-      color: var(--accent-bright);
-    }
-
-    .page {
-      display: none;
-      animation: fadeIn 0.2s ease;
-    }
-    .page.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .card {
-      background: var(--glass);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 14px;
+    /* Верхняя панель каталога */
+    .top-filters {
+      display: flex;
+      gap: 8px;
+      align-items: center;
       margin-bottom: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
     }
 
-    .char-card {
-      display: flex;
-      gap: 12px;
+    .pill-btn {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
       align-items: center;
+      gap: 6px;
       cursor: pointer;
-      transition: 0.2s;
+      white-space: nowrap;
     }
-    .char-card.selected {
-      border-color: var(--accent-bright);
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
-      background: var(--glass-strong);
+    .pill-btn.active {
+      background: #231e36;
+      border-color: rgba(168, 85, 247, 0.45);
     }
 
-    .avatar {
-      width: 54px;
-      height: 54px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(88,28,135,0.5));
-      border: 1px solid rgba(216, 180, 254, 0.3);
+    .search-box {
+      flex: 1;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 24px;
+      padding: 0 12px;
+      gap: 6px;
+    }
+    .search-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .icon-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
       flex-shrink: 0;
     }
 
-    .char-info h3 {
-      margin: 0 0 4px 0;
+    /* Сетка карточек 2 колонки */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .char-tile {
+      position: relative;
+      height: 225px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px;
+    }
+
+    .char-tile .art-bg {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 64px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.28), transparent 65%),
+        linear-gradient(180deg, rgba(19, 17, 28, 0.2) 0%, rgba(9, 8, 14, 0.94) 100%);
+    }
+
+    .char-tile .overlay-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 35%, rgba(7, 6, 11, 0.95) 100%);
+    }
+
+    .char-tile .content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .char-tile h4 {
+      margin: 0 0 2px 0;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .char-tile p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .create-tile .art-bg {
+      background:
+        radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px),
+        linear-gradient(180deg, #161224, #0a0811);
+      background-size: 18px 18px, 100% 100%;
+    }
+
+    .free-pill {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      background: rgba(25, 22, 36, 0.9);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Нижний плавающий бар */
+    .dock {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      height: 62px;
+      border-radius: 22px;
+      background: rgba(23, 21, 31, 0.92);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      z-index: 50;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.65);
+    }
+
+    .dock-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 20px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .dock-btn.active {
+      color: #fff;
+      border-color: rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.05);
+    }
+    .dock-plus {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      color: #fff;
+      border: none;
+      font-size: 22px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    /* Экран персонажа / сюжета / чата */
+    .char-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+    }
+    .char-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mini-ava {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      display: grid;
+      place-items: center;
+      font-size: 19px;
+    }
+
+    .plot-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 20px 16px;
+      text-align: center;
+      margin: 14px 0;
+    }
+    .plot-box h3 { margin: 10px 0 6px 0; font-size: 18px; }
+    .plot-box p { margin: 0 0 16px 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+    .btn-purple {
+      width: 100%;
+      padding: 13px;
+      border-radius: 14px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .btn-dark {
+      width: 100%;
+      padding: 13px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .chat-log {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .msg {
+      padding: 10px 12px;
+      border-radius: 15px;
+      font-size: 14px;
+      line-height: 1.42;
+      max-width: 88%;
+      white-space: pre-wrap;
+    }
+    .msg.bot {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+    }
+    .msg.user {
+      background: rgba(168, 85, 247, 0.24);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      align-self: flex-end;
+    }
+    .msg img {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* Нижняя панель ввода + быстрые кнопки */
+    .composer-wrap {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 9, 15, 0.96);
+      border-top: 1px solid var(--border);
+      padding: 8px 12px 12px 12px;
+      z-index: 40;
+    }
+    .input-pill {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 4px 6px 4px 14px;
+      margin-bottom: 8px;
+    }
+    .input-pill input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      padding: 6px 0;
+    }
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 8px;
+    }
+    .q-btn {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .q-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Шторка «Стиль общения» / «Создать» / «Сюжеты» */
+    .sheet-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 80;
+      align-items: flex-end;
+    }
+    .sheet-backdrop.open { display: flex; }
+
+    .sheet {
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: #14121d;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border-top: 1px solid var(--border);
+      padding: 10px 16px 24px 16px;
+    }
+    .handle {
+      width: 38px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.2);
+      margin: 0 auto 12px auto;
+    }
+    .sheet h3 { margin: 0 0 14px 0; font-size: 18px; }
+
+    .sheet-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
       font-size: 15px;
     }
-    .char-info p {
-      margin: 0;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
+    .sheet-row span.val { color: var(--muted); font-size: 13px; }
 
-    label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 10px 0 6px 2px;
-    }
-
+    label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 5px 0; }
     input, textarea, select {
       width: 100%;
-      background: rgba(11, 6, 22, 0.72);
-      border: 1px solid rgba(168, 85, 247, 0.25);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 12px;
       color: var(--text);
       font-size: 14px;
-      outline: none;
     }
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--accent-bright);
-    }
-    textarea {
-      min-height: 76px;
-      resize: vertical;
-    }
-
-    .seg-group {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      background: rgba(11, 6, 22, 0.65);
-      padding: 4px;
-      border-radius: 12px;
-      border: 1px solid rgba(168, 85, 247, 0.2);
-    }
-
-    .seg-btn {
-      padding: 8px 6px;
-      border: none;
-      border-radius: 9px;
-      background: transparent;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .seg-btn.active {
-      background: linear-gradient(135deg, #7e22ce, #a855f7);
-      color: #fff;
-    }
-
-    .switch-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 2px;
-    }
-
-    .btn-primary {
-      width: 100%;
-      margin-top: 14px;
-      padding: 13px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #7e22ce, #a855f7);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 6px 22px rgba(168, 85, 247, 0.4);
-    }
-
-    .btn-secondary {
-      width: 100%;
-      margin-top: 8px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(168, 85, 247, 0.14);
-      border: 1px solid var(--border);
-      color: var(--accent-bright);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      height: 64px;
-      background: rgba(20, 11, 38, 0.78);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
-      z-index: 100;
-    }
-
-    .nav-item {
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      font-size: 11px;
-      cursor: pointer;
-    }
-    .nav-item.active {
-      color: var(--accent-bright);
-      font-weight: 600;
-    }
-    .nav-item span.icon {
-      font-size: 18px;
-    }
+    textarea { min-height: 70px; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="title">AURA RP</div>
-    <div class="badge" id="active-badge">Персонаж не выбран</div>
+
+  <!-- ЭКРАН 1: КАТАЛОГ ПЕРСОНАЖЕЙ -->
+  <div class="screen active" id="screen-catalog">
+    <div class="top-filters">
+      <button class="pill-btn active" onclick="filterMode('all', this)">✓ От нас</button>
+      <button class="pill-btn" onclick="filterMode('custom', this)">👥 Мои</button>
+      <div class="search-box">
+        <span>🔍</span>
+        <input id="search-input" placeholder="Поиск" oninput="renderCatalog()" />
+      </div>
+      <button class="icon-circle" onclick="openStyleSheet()">🎚️</button>
+    </div>
+
+    <div class="grid" id="catalog-grid"></div>
+
+    <nav class="dock">
+      <button class="dock-btn" onclick="goChatTab()" title="Чат">🏠</button>
+      <button class="dock-btn active" onclick="goCatalogTab()" title="Персонажи">🪪</button>
+      <button class="dock-plus" onclick="openCreateSheet()" title="Создать">+</button>
+      <button class="dock-btn" onclick="openPlotsSheet()" title="Сюжеты">📖</button>
+      <button class="dock-btn" onclick="openStyleSheet()" title="Стиль">⚙️</button>
+    </nav>
   </div>
 
-  <!-- ВКЛАДКА 1: ПЕРСОНАЖИ -->
-  <div class="page active" id="page-chars">
-    <div id="chars-list"></div>
-    <button class="btn-primary" onclick="launchSession()">Начать / Обновить ролку</button>
+  <!-- ЭКРАН 2: ПЕРСОНАЖ, СЮЖЕТ И ЧАТ -->
+  <div class="screen" id="screen-chat">
+    <div class="char-header">
+      <div class="char-header-left">
+        <button class="icon-circle" onclick="goCatalogTab()">←</button>
+        <div class="mini-ava" id="chat-ava">🎭</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;" id="chat-name">Персонаж</div>
+          <div style="font-size:11px;color:var(--muted);" id="chat-meta">Сюжет не выбран</div>
+        </div>
+      </div>
+      <button class="pill-btn" onclick="openPlotsSheet()">📖 Сюжет</button>
+    </div>
+
+    <div class="plot-box" id="plot-starter">
+      <div style="font-size:28px;">📖</div>
+      <h3>Начнём с сюжета?</h3>
+      <p>Сюжет задаёт сцену и завязку — персонаж поведёт историю вместе с тобой</p>
+      <button class="btn-purple" onclick="openCustomPlotSheet()">✨ Создать сюжет</button>
+      <button class="btn-dark" onclick="openPlotsSheet()">📖 Выбрать сюжет</button>
+      <div style="margin-top:12px;font-size:13px;color:var(--muted);cursor:pointer;" onclick="startFreeChat()">
+        ✏️ Просто написать
+      </div>
+    </div>
+
+    <div class="chat-log" id="chat-log"></div>
+
+    <div class="composer-wrap">
+      <div class="input-pill">
+        <input id="msg-input" placeholder="Сообщение" onkeydown="if(event.key==='Enter') sendMessage()" />
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="quick-row">
+        <button class="q-btn active" id="btn-18" onclick="toggleHardcore()">🔥 18+</button>
+        <button class="q-btn" onclick="generateScenePhoto()">🖼️ Фото</button>
+        <button class="q-btn" onclick="openStyleSheet()">&lt;/&gt; Стиль</button>
+      </div>
+    </div>
   </div>
 
-  <!-- ВКЛАДКА 2: СОЗДАТЬ ПЕРСОНАЖА -->
-  <div class="page" id="page-create">
-    <div class="card">
-      <h3 style="margin:0 0 8px 0;">Новый персонаж</h3>
-      <label>Имя персонажа</label>
-      <input id="c-name" placeholder="Например: Вектор / Кира" />
+  <!-- ШТОРКА: СТИЛЬ ОБЩЕНИЯ -->
+  <div class="sheet-backdrop" id="sheet-style" onclick="if(event.target===this) closeSheets()">
+    <div class="sheet">
+      <div class="handle"></div>
+      <h3>Стиль общения</h3>
 
+      <div class="sheet-row" onclick="cycleOption('format', ['Действия в *звездочках*', 'Только диалог', 'Литературный'])">
+        <span>Форматирование</span>
+        <span class="val" id="val-format">Действия в *звездочках* &gt;</span>
+      </div>
+
+      <div class="sheet-row" onclick="cycleOption('swearing', ['Разрешён', 'Жёсткий', 'Запрещён'])">
+        <span>Мат</span>
+        <span class="val" id="val-swearing">Разрешён &gt;</span>
+      </div>
+
+      <div class="sheet-row" onclick="cycleOption('pov', ['От 1-го лица (Я)', 'От 2-го лица (Ты)', 'От 3-го лица (Он/Она)'])">
+        <span>POV Настройки</span>
+        <span class="val" id="val-pov">От 1-го лица (Я) &gt;</span>
+      </div>
+
+      <div class="sheet-row" onclick="cycleOption('style', ['Тёмный реализм', 'Драма / напряжение', 'Лёгкий / непринуждённый'])">
+        <span>Стиль &amp; Повествование</span>
+        <span class="val" id="val-style">Тёмный реализм &gt;</span>
+      </div>
+
+      <button class="btn-purple" style="margin-top:16px;" onclick="closeSheets()">Сохранить</button>
+    </div>
+  </div>
+
+  <!-- ШТОРКА: СОЗДАТЬ ПЕРСОНАЖА -->
+  <div class="sheet-backdrop" id="sheet-create" onclick="if(event.target===this) closeSheets()">
+    <div class="sheet">
+      <div class="handle"></div>
+      <h3>Создать персонажа</h3>
+      <label>Имя</label>
+      <input id="new-name" placeholder="Например: Рэйвен" />
       <label>Эмодзи-аватар</label>
-      <input id="c-avatar" value="🕶️" maxlength="4" />
-
-      <label>Характер и описание (внешность, манера речи)</label>
-      <textarea id="c-desc" placeholder="Холодный наемник, говорит кратко, замечает детали..."></textarea>
-
-      <label>Стартовая сцена / завязка</label>
-      <textarea id="c-intro" placeholder="Дождь барабанит по крыше заброшенного склада..."></textarea>
-
-      <button class="btn-secondary" onclick="saveCustomChar()">Сохранить в список персонажей</button>
+      <input id="new-ava" value="🖤" maxlength="4" />
+      <label>Описание / характер</label>
+      <textarea id="new-desc" placeholder="Характер, внешность, манера общения..."></textarea>
+      <button class="btn-purple" style="margin-top:12px;" onclick="createCharacter()">Создать и выбрать</button>
     </div>
   </div>
 
-  <!-- ВКЛАДКА 3: НАСТРОЙКИ И ЧАТЫ -->
-  <div class="page" id="page-settings">
-    <div class="card">
-      <h3 style="margin:0 0 8px 0;">Параметры ролки</h3>
-
-      <label>Сюжет / сеттинг</label>
-      <select id="s-plot">
-        <option value="Тёмный реализм / криминал">Тёмный реализм / криминал</option>
-        <option value="Мрачное фэнтези">Мрачное фэнтези</option>
-        <option value="Киберпанк / техно-нуар">Киберпанк / техно-нуар</option>
-        <option value="Психологическая драма">Психологическая драма</option>
-        <option value="Повседневность / романтика">Повседневность / романтика</option>
-      </select>
-
-      <label>Жесткость сцен</label>
-      <div class="seg-group" id="hardness-group">
-        <button class="seg-btn" data-val="Лайт" onclick="setSeg('hardness', this)">Лайт</button>
-        <button class="seg-btn active" data-val="Средне" onclick="setSeg('hardness', this)">Средне</button>
-        <button class="seg-btn" data-val="Хардкор" onclick="setSeg('hardness', this)">Хардкор</button>
-      </div>
-
-      <div class="switch-row" style="margin-top:12px;">
-        <div>
-          <div style="font-size:14px;font-weight:600;">Мат в речи</div>
-          <div style="font-size:11px;color:var(--muted);">Разрешить нецензурную лексику</div>
-        </div>
-        <input type="checkbox" id="s-swearing" checked style="width:20px;height:20px;" />
-      </div>
-
-      <div class="switch-row">
-        <div>
-          <div style="font-size:14px;font-weight:600;">Арт на каждую сцену</div>
-          <div style="font-size:11px;color:var(--muted);">Генерировать картинку вместе с ответом</div>
-        </div>
-        <input type="checkbox" id="s-autoimg" style="width:20px;height:20px;" />
-      </div>
-
-      <button class="btn-primary" onclick="launchSession()">Применить и запустить</button>
-    </div>
+  <!-- ШТОРКА: ВЫБОР / СОЗДАНИЕ СЮЖЕТА -->
+  <div class="sheet-backdrop" id="sheet-plots" onclick="if(event.target===this) closeSheets()">
+    <div class="sheet" id="plots-body"></div>
   </div>
-
-  <!-- НИЖНЕЕ МЕНЮ -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" id="nav-chars" onclick="switchTab('chars', this)">
-      <span class="icon">🎭</span>
-      <span>Персонажи</span>
-    </button>
-    <button class="nav-item" id="nav-create" onclick="switchTab('create', this)">
-      <span class="icon">✨</span>
-      <span>Создать</span>
-    </button>
-    <button class="nav-item" id="nav-settings" onclick="switchTab('settings', this)">
-      <span class="icon">⚙️</span>
-      <span>Настройки</span>
-    </button>
-  </nav>
 
   <script>
     const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
+    if (tg) { tg.ready(); tg.expand(); }
 
-    const defaultChars = [
-      {
-        id: "night_warden",
-        name: "Ночной куратор",
-        avatar: "🟣",
-        desc: "Спокойный, расчетливый собеседник с легкой иронией. Отыгрывает действия в *звездочках*.",
-        intro: "Неоновый свет мигает за окном комнаты. Я откидываюсь на спинку кресла и смотрю на тебя: «Ну что, начнем?»"
-      },
-      {
-        id: "ash_runner",
-        name: "Эш — контрабандист",
-        avatar: "⚡",
-        desc: "Резкий, опытный уличный проводник, привыкший к рискам и ночным вылазкам.",
-        intro: "Двигатель глухо глохнет в переулке. Я поправляю ремень на плече: «У нас мало времени до патруля»."
-      }
+    const presets = [
+      { id: "marin", name: "Китагава Марин", avatar: "✨", desc: "Энергичная, открытая, обожает косплей и яркие образы.", custom: false },
+      { id: "curator", name: "Ночной куратор", avatar: "🟣", desc: "Спокойный собеседник с холодной иронией и расчётом.", custom: false },
+      { id: "runner", name: "Эш — проводник", avatar: "⚡", desc: "Резкий уличный игрок, привыкший к ночным рискам.", custom: false },
+      { id: "raven", name: "Рэйвен", avatar: "🖤", desc: "Загадочный, прямолинейный, не любит пустых слов.", custom: false }
     ];
 
-    let hardness = "Средне";
-    let selectedCharId = defaultChars[0].id;
+    const plotPresets = [
+      { title: "Поздний вечер в пустой студии", prompt: "Ночь, приглушённый свет лампы, тихий разговор тет-а-тет после долгого дня." },
+      { title: "Неожиданный союз в тёмном городе", prompt: "Дождь в переулке, сложная ситуация и выбор, от которого зависит исход ночи." },
+      { title: "Закрытая встреча без свидетелей", prompt: "Напряжённая атмосфера, старые долги и открытые карты на столе." }
+    ];
 
-    function getAllChars() {
-      const custom = JSON.parse(localStorage.getItem("rp_custom_chars") || "[]");
-      return [...defaultChars, ...custom];
+    let filterType = "all";
+    let currentChar = null;
+    let currentPlot = null;
+    let messages = [];
+
+    const settings = {
+      format: "Действия в *звездочках*",
+      swearing: "Разрешён",
+      pov: "От 1-го лица (Я)",
+      style: "Тёмный реализм",
+      hardcore: true
+    };
+
+    function getChars() {
+      const mine = JSON.parse(localStorage.getItem("rp_mine_chars") || "[]");
+      return [...presets, ...mine];
     }
 
-    function renderChars() {
-      const list = document.getElementById("chars-list");
-      const chars = getAllChars();
-      list.innerHTML = "";
+    function filterMode(mode, btn) {
+      filterType = mode;
+      document.querySelectorAll(".top-filters .pill-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderCatalog();
+    }
 
-      chars.forEach(c => {
-        const div = document.createElement("div");
-        div.className = "card char-card" + (c.id === selectedCharId ? " selected" : "");
-        div.onclick = () => {
-          selectedCharId = c.id;
-          updateBadge();
-          renderChars();
-        };
-        div.innerHTML = `
-          <div class="avatar">${c.avatar || "🎭"}</div>
-          <div class="char-info">
-            <h3>${c.name}</h3>
+    function renderCatalog() {
+      const q = (document.getElementById("search-input").value || "").toLowerCase().trim();
+      const grid = document.getElementById("catalog-grid");
+      grid.innerHTML = "";
+
+      // Карточка «Ваш персонаж»
+      const createCard = document.createElement("div");
+      createCard.className = "char-tile create-tile";
+      createCard.onclick = openCreateSheet;
+      createCard.innerHTML = `
+        <div class="art-bg"></div>
+        <div class="free-pill">Бесплатно</div>
+        <div class="content">
+          <h4>Ваш персонаж</h4>
+          <p>Создайте собственного персонажа и общайтесь...</p>
+        </div>
+      `;
+      grid.appendChild(createCard);
+
+      const list = getChars().filter(c => {
+        if (filterType === "custom" && !c.custom) return false;
+        if (!q) return true;
+        return c.name.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+      });
+
+      list.forEach(c => {
+        const el = document.createElement("div");
+        el.className = "char-tile";
+        el.onclick = () => selectCharacter(c);
+        el.innerHTML = `
+          <div class="art-bg">${c.avatar}</div>
+          <div class="overlay-grad"></div>
+          <div class="content">
+            <h4>${c.name}</h4>
             <p>${c.desc}</p>
           </div>
         `;
-        list.appendChild(div);
+        grid.appendChild(el);
       });
-      updateBadge();
     }
 
-    function updateBadge() {
-      const ch = getAllChars().find(x => x.id === selectedCharId);
-      document.getElementById("active-badge").textContent = ch ? `${ch.avatar} ${ch.name}` : "Выбор";
+    function selectCharacter(c) {
+      currentChar = c;
+      currentPlot = null;
+      messages = [];
+      document.getElementById("chat-ava").textContent = c.avatar;
+      document.getElementById("chat-name").textContent = c.name;
+      document.getElementById("chat-meta").textContent = c.desc;
+      document.getElementById("plot-starter").style.display = "block";
+      document.getElementById("chat-log").innerHTML = "";
+      showScreen("screen-chat");
     }
 
-    function saveCustomChar() {
-      const name = document.getElementById("c-name").value.trim();
-      const avatar = document.getElementById("c-avatar").value.trim() || "🎭";
-      const desc = document.getElementById("c-desc").value.trim();
-      const intro = document.getElementById("c-intro").value.trim() || "Сцена начинается.";
+    function startWithPlot(plot) {
+      currentPlot = plot;
+      document.getElementById("plot-starter").style.display = "none";
+      document.getElementById("chat-meta").textContent = `Сюжет: ${plot.title}`;
+      pushMsg("bot", `*${plot.title}.* ${plot.prompt}\n\nЯ смотрю на тебя и жду твоего хода.`);
+      closeSheets();
+    }
 
-      if (!name || !desc) {
-        alert("Укажи имя и описание персонажа.");
-        return;
+    function startFreeChat() {
+      currentPlot = { title: "Свободная сцена", prompt: "Свободный диалог без жёсткой завязки." };
+      document.getElementById("plot-starter").style.display = "none";
+      document.getElementById("chat-meta").textContent = "Свободная сцена";
+      pushMsg("bot", `*${currentChar.name} рядом.* С чего начнём?`);
+    }
+
+    function pushMsg(role, text, imgUrl = null) {
+      messages.push({ role, text });
+      const log = document.getElementById("chat-log");
+      const div = document.createElement("div");
+      div.className = "msg " + role;
+      div.textContent = text;
+      if (imgUrl) {
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        div.appendChild(img);
+      }
+      log.appendChild(div);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function sendMessage() {
+      const inp = document.getElementById("msg-input");
+      const txt = inp.value.trim();
+      if (!txt) return;
+      if (!currentChar) currentChar = presets[0];
+      if (document.getElementById("plot-starter").style.display !== "none") {
+        document.getElementById("plot-starter").style.display = "none";
       }
 
-      const custom = JSON.parse(localStorage.getItem("rp_custom_chars") || "[]");
-      const newChar = {
-        id: "custom_" + Date.now(),
-        name,
-        avatar,
-        desc,
-        intro
-      };
-      custom.push(newChar);
-      localStorage.setItem("rp_custom_chars", JSON.stringify(custom));
-      selectedCharId = newChar.id;
+      inp.value = "";
+      pushMsg("user", txt);
 
-      document.getElementById("c-name").value = "";
-      document.getElementById("c-desc").value = "";
-      document.getElementById("c-intro").value = "";
-
-      switchTab("chars", document.getElementById("nav-chars"));
-      renderChars();
+      // Локальный fallback-ответ, пока не подключен твой сервер/API
+      const reply = `*${currentChar.name} реагирует на твои слова (${settings.style}, ${settings.pov}).* Принято: «${txt}». Подключи бэкенд OpenRouter для живых ответов ИИ.`;
+      setTimeout(() => pushMsg("bot", reply), 250);
     }
 
-    function setSeg(type, btn) {
-      btn.parentElement.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      if (type === "hardness") hardness = btn.dataset.val;
+    function generateScenePhoto() {
+      const last = messages[messages.length - 1]?.text || currentChar?.desc || "dark neon scene";
+      const prompt = encodeURIComponent(last.slice(0, 120) + ", dark purple moody aesthetic, cinematic");
+      const url = `https://image.pollinations.ai/prompt/${prompt}?model=flux&nologo=true&t=${Date.now()}`;
+      pushMsg("bot", "🖼️ Визуализация сцены:", url);
     }
 
-    function switchTab(tab, el) {
-      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-      document.getElementById("page-" + tab).classList.add("active");
-
-      document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-      el.classList.add("active");
+    function toggleHardcore() {
+      settings.hardcore = !settings.hardcore;
+      document.getElementById("btn-18").classList.toggle("active", settings.hardcore);
     }
 
-    function launchSession() {
-      const charObj = getAllChars().find(x => x.id === selectedCharId) || defaultChars[0];
-      const payload = {
-        character: charObj,
-        plot: document.getElementById("s-plot").value,
-        hardness: hardness,
-        swearing: document.getElementById("s-swearing").checked,
-        auto_img: document.getElementById("s-autoimg").checked
-      };
-
-      if (tg && tg.sendData) {
-        tg.sendData(JSON.stringify(payload));
-      } else {
-        console.log("Payload:", payload);
-        alert("Открой страницу внутри Telegram Mini App для передачи данных боту.");
-      }
+    function cycleOption(key, arr) {
+      const idx = arr.indexOf(settings[key]);
+      settings[key] = arr[(idx + 1) % arr.length];
+      document.getElementById("val-" + key).innerHTML = `${settings[key]} &gt;`;
     }
 
-    renderChars();
+    function openStyleSheet() { closeSheets(); document.getElementById("sheet-style").classList.add("open"); }
+    function openCreateSheet() { closeSheets(); document.getElementById("sheet-create").classList.add("open"); }
+
+    function openCustomPlotSheet() {
+      closeSheets();
+      const box = document.getElementById("plots-body");
+      box.innerHTML = `
+        <div class="handle"></div>
+        <h3>Создать сюжет</h3>
+        <label>Название сцены</label>
+        <input id="custom-p-title" placeholder="Например: Ночной разговор на крыше" />
+        <label>Завязка / описание</label>
+        <textarea id="custom-p-desc" placeholder="Опиши место, атмосферу и с чего всё начинается..."></textarea>
+        <button class="btn-purple" style="margin-top:12px;" onclick="applyCustomPlot()">Запустить сюжет</button>
+      `;
+      document.getElementById("sheet-plots").classList.add("open");
+    }
+
+    function applyCustomPlot() {
+      const title = document.getElementById("custom-p-title").value.trim() || "Свой сюжет";
+      const prompt = document.getElementById("custom-p-desc").value.trim() || "Сцена начинается.";
+      startWithPlot({ title, prompt });
+    }
+
+    function openPlotsSheet() {
+      closeSheets();
+      const box = document.getElementById("plots-body");
+      box.innerHTML = `<div class="handle"></div><h3>Выбрать сюжет</h3>`;
+      plotPresets.forEach(p => {
+        const row = document.createElement("div");
+        row.className = "sheet-row";
+        row.onclick = () => startWithPlot(p);
+        row.innerHTML = `<div><div style="font-weight:600;">${p.title}</div><div style="font-size:12px;color:var(--muted);">${p.prompt}</div></div><span>&gt;</span>`;
+        box.appendChild(row);
+      });
+      const customBtn = document.createElement("button");
+      customBtn.className = "btn-purple";
+      customBtn.style.marginTop = "14px";
+      customBtn.textContent = "✨ Создать свой сюжет";
+      customBtn.onclick = openCustomPlotSheet;
+      box.appendChild(customBtn);
+
+      document.getElementById("sheet-plots").classList.add("open");
+    }
+
+    function createCharacter() {
+      const name = document.getElementById("new-name").value.trim();
+      const avatar = document.getElementById("new-ava").value.trim() || "🖤";
+      const desc = document.getElementById("new-desc").value.trim() || "Свой персонаж.";
+      if (!name) return alert("Введи имя персонажа");
+
+      const mine = JSON.parse(localStorage.getItem("rp_mine_chars") || "[]");
+      const obj = { id: "u_" + Date.now(), name, avatar, desc, custom: true };
+      mine.push(obj);
+      localStorage.setItem("rp_mine_chars", JSON.stringify(mine));
+
+      document.getElementById("new-name").value = "";
+      document.getElementById("new-desc").value = "";
+      closeSheets();
+      selectCharacter(obj);
+    }
+
+    function closeSheets() {
+      document.querySelectorAll(".sheet-backdrop").forEach(s => s.classList.remove("open"));
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    function goCatalogTab() { showScreen("screen-catalog"); renderCatalog(); }
+    function goChatTab() {
+      if (!currentChar) currentChar = presets[0];
+      selectCharacter(currentChar);
+    }
+
+    renderCatalog();
   </script>
 </body>
 </html>
