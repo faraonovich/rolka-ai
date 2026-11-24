@@ -35,14 +35,20 @@
       padding: 12px 12px 92px 12px;
     }
 
+    /* Анимации иконок и аватаров */
     .anim-float {
-      animation: floatY 2.8s ease-in-out infinite;
+      animation: floatY 3s ease-in-out infinite;
     }
     .anim-pulse {
-      animation: pulseGlow 2.2s ease-in-out infinite;
+      animation: pulseGlow 2.4s ease-in-out infinite;
+    }
+    .anim-tilt {
+      animation: tiltSoft 3.6s ease-in-out infinite;
+      transform-origin: center;
     }
     .anim-spin-slow {
       animation: spinSlow 9s linear infinite;
+      transform-origin: center;
     }
 
     @keyframes floatY {
@@ -50,8 +56,12 @@
       50% { transform: translateY(-3px); }
     }
     @keyframes pulseGlow {
-      0%, 100% { opacity: 0.78; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.06); }
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    @keyframes tiltSoft {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
     }
     @keyframes spinSlow {
       from { transform: rotate(0deg); }
@@ -130,7 +140,7 @@
 
     .card {
       position: relative;
-      height: 230px;
+      height: 236px;
       border-radius: 16px;
       overflow: hidden;
       background: var(--panel);
@@ -143,20 +153,21 @@
       transition: transform 0.16s ease, border-color 0.16s ease;
     }
     .card:active { transform: scale(0.98); }
-    .card:hover { border-color: rgba(255, 255, 255, 0.2); }
+    .card:hover { border-color: rgba(255, 255, 255, 0.22); }
 
     .card-bg {
       position: absolute;
       inset: 0;
       display: grid;
       place-items: center;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(6,6,9,0.96) 100%);
+      padding-bottom: 34px;
+      background: radial-gradient(circle at 50% 34%, rgba(168, 85, 247, 0.14), transparent 65%);
     }
 
     .card-grad {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, transparent 30%, rgba(6, 6, 9, 0.96) 100%);
+      background: linear-gradient(180deg, transparent 34%, rgba(6, 6, 9, 0.96) 100%);
     }
 
     .card-top {
@@ -173,7 +184,7 @@
       letter-spacing: 0.03em;
       padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(6, 6, 9, 0.78);
+      background: rgba(6, 6, 9, 0.82);
       border: 1px solid var(--line);
       text-transform: uppercase;
     }
@@ -204,6 +215,7 @@
     }
 
     .create-card .card-bg {
+      padding-bottom: 0;
       background:
         radial-gradient(circle, rgba(255,255,255,0.14) 1px, transparent 1px),
         linear-gradient(180deg, #111118, #060609);
@@ -273,6 +285,18 @@
       min-width: 0;
     }
 
+    .room-ava-frame {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line-strong);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
     .icon-btn {
       width: 34px;
       height: 34px;
@@ -309,14 +333,34 @@
       margin-bottom: 12px;
     }
 
+    .picker-hero {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .picker-ava {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
     .scene-picker h3 {
-      margin: 8px 0 4px 0;
+      margin: 0 0 3px 0;
       font-size: 16px;
     }
     .scene-picker p {
-      margin: 0 0 12px 0;
+      margin: 0;
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.35;
     }
 
     .plot-option {
@@ -576,7 +620,7 @@
             <path d="m15 18-6-6 6-6"/>
           </svg>
         </button>
-        <div id="room-svg-wrap"></div>
+        <div class="room-ava-frame" id="room-ava"></div>
         <div style="min-width:0;">
           <div class="hero-title" id="room-name">Имя</div>
           <div class="hero-sub" id="room-sub">Характер и сцена</div>
@@ -590,11 +634,13 @@
     </div>
 
     <div class="scene-picker" id="scene-picker">
-      <svg class="anim-float" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2">
-        <path d="M12 3l1.9 5.8L20 10.7l-5.1 3.7L16.8 20 12 16.5 7.2 20l1.9-5.6L4 10.7l6.1-1.9L12 3z"/>
-      </svg>
-      <h3 id="picker-title">Сценарий для персонажа</h3>
-      <p>Выбери сюжет под её характер или напиши свой ход сразу внизу.</p>
+      <div class="picker-hero">
+        <div class="picker-ava" id="picker-ava"></div>
+        <div>
+          <h3 id="picker-title">Сценарий для персонажа</h3>
+          <p id="picker-desc">Выбери сюжет под её характер или напиши свой ход сразу внизу.</p>
+        </div>
+      </div>
       <div id="picker-plots"></div>
       <button class="btn-ghost" onclick="openCustomPlotForChar()">+ Свой сюжет для этого диалога</button>
     </div>
@@ -679,21 +725,91 @@
     const tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    function avatarSvg(vibe, accent = "#a855f7") {
-      if (vibe === "dom") {
-        return `<svg class="anim-float" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#fda4af" stroke-width="1.6">
-          <path d="M12 2 4 6v6c0 5.5 3.4 9.7 8 11 4.6-1.3 8-5.5 8-11V6l-8-4Z"/>
-          <path d="M9 12l2 2 4-4"/>
+    /* Индивидуальные анимированные SVG-аватары под каждого персонажа */
+    function renderCharAvatar(id, vibe, size = 84) {
+      const portraits = {
+        veronika: `
+          <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+            <circle cx="48" cy="48" r="42" fill="#230b16" stroke="#fb7185" stroke-width="1.8" stroke-opacity="0.5"/>
+            <path d="M22 44c2-20 14-28 26-28s24 8 26 28l3 24H19l3-24Z" fill="#3b0d1e"/>
+            <circle cx="48" cy="48" r="18" fill="#fde2e4"/>
+            <path d="M30 43c5-11 26-13 36 0-5-5-11-7-18-7s-13 2-18 7Z" fill="#1f0812"/>
+            <path class="anim-pulse" d="M36 48l5-2 5 2M50 48l5-2 5 2" stroke="#9f1239" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M43 57c3 2 7 2 10 0" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M32 76c4-8 10-11 16-11s12 3 16 11" fill="#881337"/>
+          </svg>`,
+        rina: `
+          <svg class="anim-tilt" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+            <circle cx="48" cy="48" r="42" fill="#1c0d2b" stroke="#e879f9" stroke-width="1.8" stroke-opacity="0.5"/>
+            <path d="M24 38c4-16 16-23 24-23s20 7 24 23l-6 26H30l-6-26Z" fill="#4a1568"/>
+            <circle cx="48" cy="48" r="18" fill="#fae8ff"/>
+            <path d="M34 47h9M53 47h9" stroke="#581c87" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M42 57c4 2.5 8 1.5 11-1" stroke="#a21caf" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="#701a75"/>
+          </svg>`,
+        miya: `
+          <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+            <circle cx="48" cy="48" r="42" fill="#151029" stroke="#c4b5fd" stroke-width="1.8" stroke-opacity="0.5"/>
+            <path d="M25 46c0-15 10-27 23-27s23 12 23 27v22H25V46Z" fill="#312e81"/>
+            <circle cx="48" cy="49" r="17.5" fill="#f5f3ff"/>
+            <circle cx="41" cy="49" r="2.6" fill="#312e81"/>
+            <circle cx="55" cy="49" r="2.6" fill="#312e81"/>
+            <circle cx="37" cy="54" r="3.5" fill="#f472b6" fill-opacity="0.45"/>
+            <circle cx="59" cy="54" r="3.5" fill="#f472b6" fill-opacity="0.45"/>
+            <circle cx="48" cy="57" r="2" fill="#9333ea"/>
+            <path d="M32 76c4-7.5 10-10.5 16-10.5s12 3 16 10.5" fill="#4338ca"/>
+          </svg>`,
+        alisa: `
+          <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+            <circle cx="48" cy="48" r="42" fill="#181126" stroke="#d8b4fe" stroke-width="1.8" stroke-opacity="0.5"/>
+            <circle cx="28" cy="34" r="9" fill="#581c87"/>
+            <circle cx="68" cy="34" r="9" fill="#581c87"/>
+            <circle cx="48" cy="49" r="17.5" fill="#faf5ff"/>
+            <path d="M38 49c1.5-2 4.5-2 6 0M52 49c1.5-2 4.5-2 6 0" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M44 57c2.5 2 5.5 2 8 0" stroke="#9333ea" stroke-width="2" stroke-linecap="round"/>
+            <path d="M32 76c4-7.5 10-10.5 16-10.5s12 3 16 10.5" fill="#581c87"/>
+          </svg>`,
+        marin: `
+          <svg class="anim-tilt" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+            <circle cx="48" cy="48" r="42" fill="#24180b" stroke="#fbbf24" stroke-width="1.8" stroke-opacity="0.55"/>
+            <path d="M22 45c2-20 14-29 26-29s24 9 26 29l4 23H18l4-23Z" fill="#92400e"/>
+            <circle cx="48" cy="49" r="17.5" fill="#fffbeb"/>
+            <circle cx="41" cy="48" r="3" fill="#be185d"/>
+            <circle cx="55" cy="48" r="3" fill="#be185d"/>
+            <path d="M42 56.5c3.5 3.5 8.5 3.5 12 0" stroke="#db2777" stroke-width="2.2" stroke-linecap="round"/>
+            <path class="anim-pulse" d="M71 22l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#fbbf24"/>
+            <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="#b45309"/>
+          </svg>`,
+        yuki: `
+          <svg class="anim-pulse" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+            <circle cx="48" cy="48" r="42" fill="#1f150b" stroke="#f59e0b" stroke-width="1.8" stroke-opacity="0.5"/>
+            <path d="M25 44l6-22 10 9 7-13 7 13 10-9 6 22-4 20H29l-4-20Z" fill="#78350f"/>
+            <circle cx="48" cy="49" r="17.5" fill="#fef3c7"/>
+            <path d="M36 46l9 3M60 46l-9 3" stroke="#451a03" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M43 57.5h10" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="#92400e"/>
+          </svg>`
+      };
+
+      if (portraits[id]) return portraits[id];
+
+      const colorMap = {
+        dom: { bg: "#230b16", stroke: "#fb7185", hair: "#4c0519", shirt: "#881337" },
+        sub: { bg: "#151029", stroke: "#c4b5fd", hair: "#312e81", shirt: "#4338ca" },
+        brat: { bg: "#24180b", stroke: "#fbbf24", hair: "#92400e", shirt: "#b45309" }
+      };
+      const pal = colorMap[vibe] || colorMap.sub;
+
+      return `
+        <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+          <circle cx="48" cy="48" r="42" fill="${pal.bg}" stroke="${pal.stroke}" stroke-width="1.8" stroke-opacity="0.5"/>
+          <path d="M24 45c2-19 13-28 24-28s22 9 24 28l3 22H21l3-22Z" fill="${pal.hair}"/>
+          <circle cx="48" cy="49" r="17.5" fill="#f5f3ff"/>
+          <circle cx="41" cy="49" r="2.6" fill="#1e1b4b"/>
+          <circle cx="55" cy="49" r="2.6" fill="#1e1b4b"/>
+          <path d="M43 57c3 2 7 2 10 0" stroke="#7e22ce" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="${pal.shirt}"/>
         </svg>`;
-      }
-      if (vibe === "brat") {
-        return `<svg class="anim-pulse" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="1.6">
-          <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
-        </svg>`;
-      }
-      return `<svg class="anim-float" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="${accent}" stroke-width="1.6">
-        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-      </svg>`;
     }
 
     const characters = [
@@ -823,7 +939,7 @@
         tile.className = "card";
         tile.onclick = () => openChar(c);
         tile.innerHTML = `
-          <div class="card-bg">${avatarSvg(c.vibe)}</div>
+          <div class="card-bg">${renderCharAvatar(c.id, c.vibe, 92)}</div>
           <div class="card-grad"></div>
           <div class="card-top">
             <span class="role-tag ${c.vibe}">${c.roleLabel}</span>
@@ -844,10 +960,12 @@
       domOverride = "auto";
       updateDomPill();
 
-      document.getElementById("room-svg-wrap").innerHTML = avatarSvg(c.vibe);
+      document.getElementById("room-ava").innerHTML = renderCharAvatar(c.id, c.vibe, 42);
+      document.getElementById("picker-ava").innerHTML = renderCharAvatar(c.id, c.vibe, 58);
       document.getElementById("room-name").textContent = c.name;
       document.getElementById("room-sub").textContent = `${c.roleLabel} · выбери сюжет`;
-      document.getElementById("picker-title").textContent = `Сюжеты с ${c.name}`;
+      document.getElementById("picker-title").textContent = `${c.name} · ${c.roleLabel}`;
+      document.getElementById("picker-desc").textContent = c.desc;
 
       const plotsBox = document.getElementById("picker-plots");
       plotsBox.innerHTML = "";
