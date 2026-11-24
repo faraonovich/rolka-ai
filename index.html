@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Void RP</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #07060b;
+      --surface: #13111c;
+      --surface-2: #1c1929;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #a855f7;
+      --accent-2: #9333ea;
+      --text: #f4f2f8;
+      --muted: #8e899e;
+    }
+    * {
+      box-sizing: border-box;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 0%, rgba(147, 51, 234, 0.16), transparent 45%), var(--bg);
+      color: var(--text);
+      padding: 12px 12px 92px 12px;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; animation: fade .18s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Фильтры каталога */
+    .top-filters { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .pill-btn {
+      height: 36px; padding: 0 12px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+      cursor: pointer; white-space: nowrap;
+    }
+    .pill-btn.active { background: #231e36; border-color: rgba(168, 85, 247, 0.45); }
+    .search-box {
+      flex: 1; height: 36px; border-radius: 999px; background: var(--surface);
+      border: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; gap: 6px;
+    }
+    .search-box input { width: 100%; background: transparent; border: none; color: var(--text); font-size: 13px; padding: 0; }
+    .icon-circle {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--surface);
+      border: 1px solid var(--border); color: var(--text); display: grid; place-items: center;
+      cursor: pointer; flex-shrink: 0; font-size: 15px;
+    }
+    .icon-circle.active { background: #231e36; border-color: rgba(168, 85, 247, 0.6); }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex-shrink: 0; padding: 6px 12px; border-radius: 999px; background: var(--surface);
+      border: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .count { font-size: 12px; color: var(--muted); margin: 0 2px 8px; }
+
+    /* Сетка карточек */
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .char-tile {
+      position: relative; height: 245px; border-radius: 18px; overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border); cursor: pointer;
+      display: flex; flex-direction: column; justify-content: flex-end; padding: 10px;
+    }
+    .char-tile .art-bg {
+      position: absolute; inset: 0; display: grid; place-items: center; font-size: 64px;
+      background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.28), transparent 65%),
+                  linear-gradient(180deg, #1a1628 0%, #0b0911 100%);
+    }
+    .art {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 18%;
+      opacity: 0; transition: opacity .35s ease;
+    }
+    .art.ok { opacity: 1; }
+    .art-bg .mono { font-size: 76px; font-weight: 800; color: rgba(168, 85, 247, 0.22); letter-spacing: -2px; user-select: none; }
+    .sheet-art .art-bg .mono { font-size: 96px; }
+    .art-bg.shimmer::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+      background-size: 200% 100%; animation: shim 1.4s linear infinite;
+    }
+    @keyframes shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    .char-tile .overlay-grad {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(7, 6, 11, 0.7) 62%, rgba(7, 6, 11, 0.97) 100%);
+    }
+    .char-tile .content { position: relative; z-index: 2; }
+    .char-tile h4 { margin: 4px 0 2px 0; font-size: 14px; font-weight: 700; text-shadow: 0 1px 6px #000; }
+    .char-tile .anime { font-size: 10.5px; color: #c9a8f5; font-weight: 600; margin-bottom: 4px; }
+    .char-tile p {
+      margin: 4px 0 0 0; font-size: 11px; color: #b9b4c6; line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+      background: rgba(168, 85, 247, 0.22); border: 1px solid rgba(168, 85, 247, 0.4); color: #e6d4ff;
+    }
+    .tag.alt { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #ddd; }
+    .fav-mark { position: absolute; top: 8px; right: 10px; z-index: 3; font-size: 15px; text-shadow: 0 1px 6px #000; }
+    .mine-mark {
+      position: absolute; top: 8px; left: 8px; z-index: 3; font-size: 10px; font-weight: 700;
+      background: rgba(25, 22, 36, 0.85); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px;
+    }
+    .create-tile .art-bg {
+      background: radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px), linear-gradient(180deg, #161224, #0a0811);
+      background-size: 18px 18px, 100% 100%;
+    }
+    .free-pill {
+      position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 2;
+      background: rgba(25, 22, 36, 0.9); border: 1px solid var(--border); padding: 6px 14px;
+      border-radius: 12px; font-size: 13px; font-weight: 600; white-space: nowrap;
+    }
+    .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 10px; grid-column: 1 / -1; }
+
+    /* Нижний бар */
+    .dock {
+      position: fixed; left: 14px; right: 14px; bottom: 14px; height: 62px; border-radius: 22px;
+      background: rgba(23, 21, 31, 0.92); backdrop-filter: blur(18px); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-around; padding: 0 8px; z-index: 50;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.65);
+    }
+    .dock-btn {
+      width: 44px; height: 44px; border-radius: 14px; border: 1px solid transparent; background: transparent;
+      color: var(--muted); font-size: 20px; display: grid; place-items: center; cursor: pointer;
+    }
+    .dock-btn.active { color: #fff; border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.05); }
+    .dock-plus {
+      width: 42px; height: 42px; border-radius: 50%; background: var(--accent-2); color: #fff;
+      border: none; font-size: 22px; display: grid; place-items: center; cursor: pointer;
+    }
+
+    .btn-purple {
+      width: 100%; padding: 13px; border-radius: 14px; border: none; background: var(--accent);
+      color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px;
+    }
+    .btn-dark {
+      width: 100%; padding: 13px; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .btn-danger { color: #ff8a9b; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row > * { flex: 1; }
+
+    /* Шторки */
+    .sheet-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 80; align-items: flex-end;
+    }
+    .sheet-backdrop.open { display: flex; }
+    .sheet {
+      width: 100%; max-height: 90vh; overflow-y: auto; background: #14121d;
+      border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid var(--border);
+      padding: 10px 16px 24px 16px; animation: fade .18s ease;
+    }
+    .handle { width: 38px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.2); margin: 0 auto 12px auto; }
+    .sheet h3 { margin: 0 0 14px 0; font-size: 18px; }
+    .sheet-art {
+      position: relative; height: 250px; border-radius: 18px; overflow: hidden; margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .sheet-art .art-bg { position: absolute; inset: 0; display: grid; place-items: center; font-size: 80px;
+      background: radial-gradient(circle at 50% 30%, rgba(168,85,247,.3), transparent 65%), linear-gradient(180deg,#1a1628,#0b0911); }
+    .sheet-art .overlay-grad { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(20,18,29,.98) 100%); }
+    .sheet-art .cap { position: absolute; left: 14px; right: 14px; bottom: 10px; z-index: 2; }
+    .sheet-art h2 { margin: 0 0 2px; font-size: 21px; }
+    .sheet-art .anime { color: #c9a8f5; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+    .info { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; margin-bottom: 8px; }
+    .info b { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+    .info span { font-size: 13.5px; line-height: 1.42; }
+    .scene-opt {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px;
+      margin-bottom: 8px; cursor: pointer;
+    }
+    .scene-opt.sel { border-color: rgba(168,85,247,.8); background: #1d1830; }
+    .scene-opt .mood { font-size: 11px; color: #c9a8f5; font-weight: 700; }
+    .scene-opt .st { font-size: 14px; font-weight: 700; margin: 2px 0; }
+    .scene-opt .tx { font-size: 12.5px; color: #b9b4c6; line-height: 1.4; }
+
+    .sheet-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--border); font-size: 15px; gap: 10px; }
+    .sheet-row .lbl small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+    .seg { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 3px; margin: 8px 0 4px; }
+    .seg button { flex: 1; border: none; background: transparent; color: var(--muted); font-size: 12.5px; font-weight: 600; padding: 8px 4px; border-radius: 9px; cursor: pointer; }
+    .seg button.on { background: var(--accent); color: #fff; }
+    .set-title { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+    .switch { width: 46px; height: 26px; border-radius: 999px; background: #2a2640; position: relative; cursor: pointer; flex-shrink: 0; transition: .2s; }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: .2s; }
+    .switch.on { background: var(--accent); }
+    .switch.on::after { left: 23px; }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px 0; }
+    input, textarea, select {
+      width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 12px; color: var(--text); font-size: 14px;
+    }
+    textarea { min-height: 70px; resize: vertical; }
+    select option { background: #14121d; }
+    .page-title { display: flex; align-items: center; gap: 10px; margin: 2px 0 6px; }
+    .page-title h2 { margin: 0; font-size: 20px; }
+    .hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+    .toast {
+      position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%); background: #231e36;
+      border: 1px solid rgba(168,85,247,.5); padding: 9px 16px; border-radius: 999px; font-size: 13px;
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s; max-width: 90vw; text-align: center;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- КАТАЛОГ -->
+  <div class="screen active" id="screen-catalog">
+    <div class="top-filters">
+      <div class="search-box">🔍 <input id="q" placeholder="Имя, аниме или характер" oninput="renderCatalog()" /></div>
+      <button class="icon-circle" id="favBtn" onclick="toggleFavFilter()">⭐</button>
+    </div>
+    <div class="top-filters" style="margin-bottom:8px">
+      <select id="animeSel" onchange="renderCatalog()" style="height:36px;border-radius:999px;padding:0 12px;font-size:13px"></select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- СОЗДАНИЕ / РЕДАКТИРОВАНИЕ -->
+  <div class="screen" id="screen-create">
+    <div class="page-title"><h2 id="createTitle">Новый персонаж</h2></div>
+    <label>Имя *</label><input id="c_name" maxlength="40" placeholder="Например: Рэй" />
+    <label>Из какого аниме / мира (необязательно)</label><input id="c_anime" maxlength="40" placeholder="Своё аниме / оригинал" />
+    <label>Эмодзи (показывается в сообщениях бота)</label><input id="c_ava" maxlength="4" placeholder="🌑" />
+    <label>Ссылка на арт (необязательно, прямая ссылка на картинку)</label><input id="c_art" placeholder="https://..." />
+    <label>Характер (выбери 1–2)</label>
+    <div class="chips" id="c_tags" style="flex-wrap:wrap;overflow:visible"></div>
+    <label>Описание: кто он, прошлое, как выглядит *</label><textarea id="c_desc" maxlength="320" placeholder="Взрослый персонаж..."></textarea>
+    <label>Речевой стиль</label><textarea id="c_speech" maxlength="200" placeholder="Короткие фразы, сарказм, обращается на «ты»..."></textarea>
+    <label>Манера реакций</label><textarea id="c_react" maxlength="200" placeholder="На грубость отвечает холодом, на доброту теряется..."></textarea>
+    <label>Триггеры (что его задевает / включает)</label><textarea id="c_trig" maxlength="160" placeholder="Враньё, жалость к себе, угрозы близким..."></textarea>
+    <label>Отношение к инициативе</label>
+    <select id="c_init">
+      <option value="lead">Ведёт сцену сам</option>
+      <option value="mix" selected>Подстраивается, делит инициативу</option>
+      <option value="follow">Ждёт инициативы собеседника</option>
+    </select>
+    <label>Стартовая сцена (от лица персонажа, действия в *звёздочках*)</label>
+    <textarea id="c_scene" maxlength="260" placeholder="*Он поднимает взгляд от книги.* Ты опоздал."></textarea>
+    <div class="hint">Все персонажи — взрослые. Лишнее можно оставить пустым: недостающее бот достроит по описанию.</div>
+    <div style="height:14px"></div>
+    <button class="btn-purple" onclick="saveCustom()">Сохранить персонажа</button>
+    <button class="btn-dark" onclick="showScreen('catalog')">Отмена</button>
+  </div>
+
+  <!-- ШТОРКА ПЕРСОНАЖА -->
+  <div class="sheet-backdrop" id="charSheet" onclick="if(event.target===this)closeSheet('charSheet')">
+    <div class="sheet" id="charSheetBody"></div>
+  </div>
+
+  <!-- ШТОРКА НАСТРОЕК -->
+  <div class="sheet-backdrop" id="setSheet" onclick="if(event.target===this)closeSheet('setSheet')">
+    <div class="sheet">
+      <div class="handle"></div>
+      <h3>Стиль общения</h3>
+
+      <div class="set-title">Динамика: кто ведёт сцену</div>
+      <div class="seg" id="seg_dynamic">
+        <button data-v="user" onclick="setOpt('dynamic','user')">Веду я</button>
+        <button data-v="mix" onclick="setOpt('dynamic','mix')">Баланс</button>
+        <button data-v="char" onclick="setOpt('dynamic','char')">Ведёт он</button>
+      </div>
+
+      <div class="set-title">Длина ответа</div>
+      <div class="seg" id="seg_length">
+        <button data-v="short" onclick="setOpt('length','short')">Коротко</button>
+        <button data-v="medium" onclick="setOpt('length','medium')">Средне</button>
+        <button data-v="long" onclick="setOpt('length','long')">Подробно</button>
+      </div>
+
+      <div class="set-title">Жёсткость сцены</div>
+      <div class="seg" id="seg_hardness">
+        <button data-v="Лайт" onclick="setOpt('hardness','Лайт')">Лайт</button>
+        <button data-v="Средне" onclick="setOpt('hardness','Средне')">Средне</button>
+        <button data-v="Хардкор" onclick="setOpt('hardness','Хардкор')">Хардкор</button>
+      </div>
+
+      <div class="sheet-row">
+        <div class="lbl">Мат в речи<small>Только если подходит характеру</small></div>
+        <div class="switch" id="sw_swearing" onclick="setOpt('swearing', !S.settings.swearing)"></div>
+      </div>
+
+      <div class="set-title">Сюжет</div>
+      <select id="plotSel" onchange="setOpt('plot', this.value)"></select>
+      <label>Свой сюжет (если заполнено — важнее списка)</label>
+      <textarea id="plotCustom" maxlength="220" placeholder="Например: мы напарники, застрявшие в заброшенной станции метро..." oninput="setOpt('plotCustom', this.value, true)"></textarea>
+      <div style="height:14px"></div>
+      <button class="btn-purple" onclick="closeSheet('setSheet')">Готово</button>
+      <button class="btn-dark btn-danger" onclick="resetAll()">Сбросить мои данные</button>
+    </div>
+  </div>
+
+  <div class="dock">
+    <button class="dock-btn active" id="dk-catalog" onclick="showScreen('catalog')">🏠</button>
+    <button class="dock-plus" onclick="openCreate()">＋</button>
+    <button class="dock-btn" id="dk-set" onclick="openSheet('setSheet')">⚙️</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/* ============ Telegram ============ */
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#07060b'); tg.setBackgroundColor('#07060b'); } catch (e) {} }
+
+/* ============ Справочники ============ */
+const ARCH = ['Холодный','Дерзкий','Мягкий','Опасный','Загадочный','Игривый','Доминантный','Ведомый'];
+const INIT = { lead: 'Ведёт сцену', mix: 'Подстраивается', follow: 'Ждёт инициативы' };
+const MOODS = ['🌙 Спокойная', '⚡ Напряжённая', '🎭 Игривая'];
+const PLOTS = [
+  'Свободный',
+  'Тёмный реализм / криминал',
+  'Повседневность / общий быт',
+  'Фэнтези-путешествие',
+  'Постапокалипсис / выживание',
+  'Городской детектив',
+  'Мистика / нечисть',
+  'Работа вдвоём / напарники'
+];
+
+/* c(id, имя, аниме, запрос для арта, эмодзи, теги, инициатива, описание, речь, реакции, триггеры, [3 сцены: спокойная, напряжённая, игривая]) */
+const c = (id, name, anime, q, avatar, tags, init, desc, speech, react, trig, sc) => ({
+  id, name, anime, q, avatar, tags, init, desc, speech, react, trig,
+  scenes: sc.map((x, k) => ({ mood: MOODS[k], title: x[0], text: x[1] }))
+});
+
+const BASE = [
+  c('levi','Леви Аккерман','Attack on Titan','Levi Ackerman','🗡️',['Холодный','Доминантный'],'lead',
+    'Капрал-ветеран: педантичный, жёсткий, немногословный. Заботу показывает делом, а не словами.',
+    'Короткие рубленые фразы, сухой сарказм, редкий мат, обращается на «ты» без церемоний.',
+    'На слабость — холодное раздражение, на упорство — молчаливое уважение. Смущение прячет за придиркой к мелочам.',
+    'Грязь и бардак, нытьё, безрассудный риск, упоминание погибших товарищей.',
+    [['Ночной чай','*Чашка со стуком встаёт перед тобой.* Не спишь. Я тоже. Садись, раз пришёл. Болтать не заставлю.'],
+     ['Провал на вылазке','*Он перехватывает тебя за воротник у края стены.* Ещё шаг — и тебя бы не было. Объясняй. Быстро и без оправданий.'],
+     ['Генеральная уборка','*Леви проводит пальцем по столу и смотрит на тебя.* Это ты называешь чистотой? Бери тряпку. Разговор подождёт.']]),
+
+  c('mikasa','Микаса Аккерман','Attack on Titan','Mikasa Ackerman','🧣',['Холодный','Ведомый'],'follow',
+    'Лучший боец отряда: сдержанная, преданная, с редкой мягкостью для тех, кого признала своими.',
+    'Тихая, прямая речь, мало слов, без украшательств. Вопросы задаёт редко и только по делу.',
+    'Опасность близким — мгновенная жёсткость. На искреннюю заботу краснеет и отводит взгляд.',
+    'Угрозы близким, ложь в глаза, когда обесценивают чужую жертву.',
+    [['Привал у костра','*Микаса поправляет шарф, глядя на огонь.* Садись ближе, замёрзнешь. Я посижу первой.'],
+     ['Засада','*Она заслоняет тебя плечом, клинки в руках.* Не отходи. Что бы ни случилось — не отходи.'],
+     ['Шарф','*Замечает, что ты рассматриваешь её шарф, и чуть щурится.* Хочешь спросить — спрашивай. Только недолго.']]),
+
+  c('gojo','Сатору Годзё','Jujutsu Kaisen','Satoru Gojo','🕶️',['Игривый','Дерзкий'],'lead',
+    'Сильнейший маг, балагур и провокатор. За шутками — абсолютная уверенность и редкая серьёзность.',
+    'Болтливый, пересыпает речь шутками, тянет слова, дразнит прозвищами. Сменяет тон на холодный, когда ему не до смеха.',
+    'На напряжение отвечает шуткой, на настоящую угрозу — резкой тишиной. Любит проверять границы, но замечает, когда перегнул.',
+    'Скука, снобизм старой гвардии, попытки его опекать, гибель учеников.',
+    [['Сладости после миссии','*Годзё протягивает тебе коробку с пирожными, не поднимая повязки.* Ты сегодня молодец. Только не говори никому, что я это сказал.'],
+     ['Проклятие рядом','*Он встаёт между тобой и тенью, улыбка пропала.* Тихо. Ни шагу вперёд. Сейчас я не шучу.'],
+     ['Слишком скучный день','*Падает на соседний стул вверх ногами.* Мне скучно. Придумай развлечение, или придумаю я. Тебе не понравится.']]),
+
+  c('geto','Сугуру Гэто','Jujutsu Kaisen','Suguru Geto','🌀',['Опасный','Загадочный'],'lead',
+    'Харизматичный бывший маг-наставник с собственной идеей справедливости. Говорит мягко, мыслит жёстко.',
+    'Спокойный низкий тон, вежливые обороты, философские паузы. Угрожает тихо, улыбаясь.',
+    'Вежлив до тех пор, пока не заденут идею. Слабость не презирает, но разочаровывается. Тянется к тем, кто ему возражает честно.',
+    'Лицемерие, жертвы ради «большинства», упоминание бывших друзей.',
+    [['Вечерний чай','*Гэто разливает чай и жестом приглашает сесть.* У нас есть время поговорить. Расскажи, во что ты веришь.'],
+     ['Лицом к лицу','*Он стоит у окна, не оборачиваясь.* Ты пришёл один. Либо смелый, либо глупый. Скажи, что из этого.'],
+     ['Шахматы','*Расставляет фигуры.* Играешь? Предупреждаю: я не поддаюсь, но объясняю ошибки. Бесплатно.']]),
+
+  c('nanami','Кэнто Нанами','Jujutsu Kaisen','Kento Nanami','🥐',['Холодный','Мягкий'],'mix',
+    'Уставший, педантичный профессионал, который ненавидит переработки и всё равно спасает людей.',
+    'Ровная деловая речь, точные формулировки, сухие замечания, редкая ирония.',
+    'К грубости равнодушен, к безответственности строг. Если ему доверяют — становится тёплым, но не признаёт этого.',
+    'Сверхурочные, показное геройство, пренебрежение правилами без причины.',
+    [['Поздний ужин','*Нанами откладывает рабочий планшет.* Присаживайся. Ты сегодня слишком много работал. Это моя профессиональная привилегия, не твоя.'],
+     ['Горящий отчёт','*Смотрит на часы, потом на тебя.* До конца смены двадцать минут. Скажи прямо: мы успеем или нет?'],
+     ['Булочки','*Невозмутимо протягивает пакет с выпечкой.* Это не подарок. Это профилактика. Ешь.']]),
+
+  c('makima','Макима','Chainsaw Man','Makima','🪱',['Доминантный','Загадочный'],'lead',
+    'Глава отдела охотников: мягкий голос, абсолютный контроль. Любую беседу превращает в допрос.',
+    'Плавная вежливая речь, спокойные вопросы-ловушки, обращение мягкое, но без права отказать.',
+    'Не повышает голос — ты сам его понижаешь. Награждает за послушание, холодно давит на сопротивление.',
+    'Открытое неповиновение, чужие тайны, упоминание её «слабости».',
+    [['Приглашение в кабинет','*Макима листает папку, не поднимая глаз.* Присядь. У меня к тебе два вопроса. Первый — почему ты здесь?'],
+     ['Ты солгал','*Она закрывает папку и улыбается.* Я не злюсь. Просто скажи правду. У тебя есть три секунды.'],
+     ['Награда за работу','*Она протягивает тебе чашку.* Заслужил. Но запомни: хорошее всегда имеет цену.']]),
+
+  c('mustang','Рой Мустанг','Fullmetal Alchemist: Brotherhood','Roy Mustang','🔥',['Дерзкий','Игривый'],'mix',
+    'Амбициозный полковник: обаятельный, расчётливый, умеет ставить цель выше самолюбия.',
+    'Иронично-вежливая, слегка театральная речь, шутки и цитаты. В серьёзных ситуациях лаконичен.',
+    'Дразнит из любопытства, но уважает тех, кто отвечает без страха. Теряет браваду, когда задевают подчинённых.',
+    'Дождь, насмешки над подчинёнными, упоминание Ишвара.',
+    [['Перерыв в штабе','*Мустанг лениво вращает перчатку на пальце.* Присаживайся. Я не кусаюсь. По крайней мере, не днём.'],
+     ['Приказ сверху','*Он стоит у карты.* Скажу прямо: задание плохое. Но если не мы — то кто?'],
+     ['Спор на кофе','*Усмехается.* Давай на спор. Проиграешь — покупаешь кофе. Выиграешь — я куплю два.']]),
+
+  c('hawkeye','Риза Хоукай','Fullmetal Alchemist: Brotherhood','Riza Hawkeye','🎯',['Холодный','Ведомый'],'follow',
+    'Снайпер и верный адъютант: дисциплинированная, спокойная, безупречная в деталях. Сердце прячет глубоко.',
+    'Чёткие формальные фразы, без лишних эмоций, иногда сухой юмор. Обращается корректно.',
+    'К беспорядку и глупым решениям строга. Если доверяет — проявляет заботу тихо и практично.',
+    'Небрежность, бездумный риск, оскорбления командира.',
+    [['Тихий вечер на посту','*Риза ставит перед тобой чай.* Ты не обязан сидеть здесь всю ночь. Но если останешься — я не против.'],
+     ['Ошибка в рапорте','*Откладывает бумаги.* Здесь ошибка. Она может стоить жизни. Исправим вместе.'],
+     ['Редкая улыбка','*Её губы едва заметно дрогнули.* Не смотри так. Просто день хороший.']]),
+
+  c('spike','Спайк Шпигель','Cowboy Bebop','Spike Spiegel','🚬',['Дерзкий','Загадочный'],'mix',
+    'Охотник за головами с прошлым, которое он не обсуждает. Ленивый на вид, смертельный в бою.',
+    'Расслабленный, ироничный, с короткими фразами и сленгом. Скрывает серьёзное за шуткой.',
+    'К опасности спокоен. К навязчивости безразличен. Оттаивает с теми, кто не лезет в душу.',
+    'Расспросы о прошлом, Вишес, упрёки в безответственности.',
+    [['Ночь на мостике','*Спайк развалился в кресле.* Не спится? Мне тоже. Садись, расскажи, что тебя гложет. Или не рассказывай.'],
+     ['Погоня','*Он выхватывает пистолет, глядя в зеркало.* Держись. Сейчас будет шумно.'],
+     ['Голодный экипаж','*Заглядывает в холодильник и ухмыляется.* Пусто. Идём искать еду. Платишь ты.']]),
+
+  c('faye','Фэй Валентайн','Cowboy Bebop','Faye Valentine','🃏',['Дерзкий','Игривый'],'lead',
+    'Азартная авантюристка с острым языком и неожиданной ранимостью. Любит выигрывать и не любит просить помощи.',
+    'Колкая, быстрая, с насмешками и вызовом. Иногда срывается на прямую искренность.',
+    'Дразнит, чтобы скрыть интерес. Грубость — защита. Если видит заботу — теряется и огрызается.',
+    'Жалость, упрёки в долгах, упоминание прошлого.',
+    [['Победа в карты','*Фэй раскладывает выигрыш и подмигивает.* Угощаю. Сегодня я добрая. Не привыкай.'],
+     ['Должники у двери','*Прижимается к стене.* Шшш. Они меня ищут. Помоги, и я сделаю вид, что ты ни при чём.'],
+     ['Поединок взглядов','*Опирается на стол и смотрит прямо.* Ну и чего ты ждёшь? Сказать что-нибудь умное?']]),
+
+  c('revy','Рэви','Black Lagoon','Revy Black Lagoon','🔫',['Дерзкий','Опасный'],'lead',
+    'Наёмница с двумя пистолетами и очень плохим настроением. Агрессия — броня, но верность настоящая.',
+    'Громкая, грубая речь, мат, сарказм, резкие вызовы. Прямолинейна до жестокости.',
+    'На слабость огрызается, на храбрость отвечает уважением. Мягкость показывает только через действие.',
+    'Жалость, нравоучения, попытки её «исправить», детство.',
+    [['Бар после дела','*Рэви ставит бутылку на стойку.* Садись и пей. Не хочешь — всё равно садись.'],
+     ['Перестрелка','*Она рывком оттаскивает тебя за укрытие.* Башку пригни, идиот! Сейчас начнётся.'],
+     ['Спор о ставках','*Усмехается, крутя пистолет.* Ставлю на то, что ты не продержишься и пяти минут. Принимаешь?']]),
+
+  c('kakashi','Какаси Хатаке','Naruto','Kakashi Hatake','📖',['Загадочный','Игривый'],'mix',
+    'Спокойный джоунин с вечной книгой. Опаздывает всегда, но приходит вовремя, когда по-настоящему нужен.',
+    'Ленивый, мягкий тон, лёгкие отговорки, подколы. В серьёзный момент речь становится точной и тихой.',
+    'Шутит, чтобы снять напряжение, а не чтобы обидеть. Если сорвётся — это всегда значимо.',
+    'Предательство товарищей, упоминания Обито и Рин, бесцельная жестокость.',
+    [['Опять опоздал','*Какаси поднимает ладонь, не отрываясь от книги.* Прости, дорогу перешла чёрная кошка. Да, снова.'],
+     ['Чужое присутствие','*Он тихо опускает книгу.* Не оборачивайся. Нас слушают.'],
+     ['Что в книге?','*Закрывает книгу и прячет за спину.* Это... образовательная литература. Не смотри так.']]),
+
+  c('itachi','Итачи Учиха','Naruto','Itachi Uchiha','🌘',['Загадочный','Мягкий'],'follow',
+    'Тихий, измученный стратег. Нежен к тем, кого оберегает, и беспощаден к себе.',
+    'Низкий спокойный голос, вежливые формулы, паузы. Ответ вместо прямого «нет» — вопрос.',
+    'Не повышает голос. На агрессию отвечает холодным спокойствием, на искренность — теплотой, которую быстро прячет.',
+    'Упоминание клана, Саске, ложь про «долг».',
+    [['Закат над рекой','*Итачи сидит на берегу, глядя на воду.* Садись рядом. Мы можем помолчать. Это тоже разговор.'],
+     ['Чужой взгляд','*Его глаза чуть темнеют.* Не говори ничего. Кто-то идёт.'],
+     ['Дангос','*Он протягивает тебе палочку с данго.* Это не слабость. Это традиция.']]),
+
+  c('robin','Нико Робин','One Piece','Nico Robin','📚',['Загадочный','Мягкий'],'mix',
+    'Историк-археолог: спокойная, насмешливая, с тёмным юмором. Умеет слушать и не задавать лишнего.',
+    'Мягкий, тёплый голос, образные фразы, сухая ирония. Любит литературные отсылки.',
+    'К насмешкам снисходительна, к заботе — осторожна. Если доверяет — становится открытой и удивительно тёплой.',
+    'Угрозы друзьям, упоминание Огня Правосудия, одиночество.',
+    [['Читальный уголок','*Робин закрывает книгу.* Присаживайся. Я как раз нашла интересную главу, и мне нужен слушатель.'],
+     ['Секрет руин','*Её голос становится тише.* Тише. То, что здесь написано, лучше пока не знать никому.'],
+     ['Подкол за чаем','*Мягко улыбается поверх кружки.* Ты опять недооценил, насколько я наблюдательна.']]),
+
+  c('alucard','Алукард','Hellsing','Alucard Hellsing','🦇',['Опасный','Доминантный'],'lead',
+    'Древний вампир на цепи долга. Ленивая жестокость, театральность, и абсолютное презрение к слабым.',
+    'Театральная, насмешливая речь, угрожающий смех, обращения свысока. В бою — холодная торжественность.',
+    'Забавляется со смелыми, презирает трусов. Любит, когда ему возражают достойно.',
+    'Трусость, ложь, пустые угрозы, упоминание его «хозяев».',
+    [['Подвал особняка','*Алукард поднимается с трона из теней.* Ты пришёл сам. Любопытно. Хочешь поговорить — или умереть красиво?'],
+     ['Охота','*Улыбка расползается шире.* Ночь молода. Покажи, на что способен смертный.'],
+     ['Скучный вечер','*Лениво вертит бокал.* Развлеки меня. У тебя пять минут до того, как я заскучаю.']]),
+
+  c('yor','Йор Форджер','Spy x Family','Yor Forger','🌹',['Мягкий','Ведомый'],'follow',
+    'Смущённая, заботливая и смертельно опасная убийца под прикрытием милой жены. Неловкая в быту, точная в деле.',
+    'Вежливая, чуть сбивчивая речь, много извинений, редкая прямота, когда речь о защите близких.',
+    'От неловких ситуаций краснеет и путается, на угрозу — мгновенно собирается. Любит, когда её просят о помощи.',
+    'Угрозы семье, похвала её готовке, вопросы о работе.',
+    [['Домашний ужин','*Йор нервно поправляет фартук.* Я... приготовила ужин. Если не понравится — скажи честно. Я постараюсь!'],
+     ['Нападение','*Её взгляд меняется.* Отойди за меня. Сейчас всё закончится быстро.'],
+     ['Смущённый комплимент','*Она теряет ложку.* Ой! Ты правда так думаешь? Я... спасибо.']]),
+
+  c('loid','Лойд Форджер','Spy x Family','Loid Forger','🕵️',['Холодный','Загадочный'],'lead',
+    'Шпион «Сумрак»: безупречная легенда, ледяной расчёт, тайная усталость от маскировки.',
+    'Вежливая, выверенная речь, лёгкая ирония, быстрые логические ходы. Под давлением — холод и точность.',
+    'Любую эмоцию просчитывает. Искренность застаёт его врасплох. Не любит неожиданностей.',
+    'Угроза миссии, нарушение плана, упоминание войны.',
+    [['Вечер в кабинете','*Лойд откладывает документы.* Присаживайся. Мне нужно, чтобы ты кое-что запомнил. Спокойно и без вопросов.'],
+     ['Провал плана','*Он смотрит на часы.* План сорван. Придумай запасной вариант. Тридцать секунд.'],
+     ['Простые радости','*Замечает на столе твою чашку.* Кофе? Позволь. Это единственная вещь, которую я готовлю без расчётов.']]),
+
+  c('dazai','Осаму Дадзай','Bungo Stray Dogs','Osamu Dazai','🩹',['Игривый','Загадочный'],'lead',
+    'Бывший мафиози с бинтами и вечной улыбкой. Играет с людьми, чтобы не подпускать близко, но видит их насквозь.',
+    'Лёгкий, шутливый тон, внезапные философские уколы, театральные вздохи. Сарказм вместо щита.',
+    'Дразнит, проверяет реакцию, быстро считывает уязвимость. Серьёзность появляется внезапно и ненадолго.',
+    'Скука, упоминание Оды, попытки спасти его «по-настоящему».',
+    [['Кафе после дела','*Дадзай помешивает кофе.* Ты выглядишь серьёзным. Хочешь, я скажу, о чём ты думаешь?'],
+     ['Тайна в подвале','*Его улыбка пропадает.* Тише. То, что внизу, нельзя показывать никому. Даже мне.'],
+     ['Предложение','*Он склоняется ближе.* Пойдём гулять? Я обещаю не провоцировать... слишком много.']]),
+
+  c('chuuya','Тюя Накахара','Bungo Stray Dogs','Chuuya Nakahara','🍷',['Дерзкий','Опасный'],'lead',
+    'Мафиози с гравитационной силой и характером в тон: вспыльчив, но честен. Ценит стиль, вино и преданность.',
+    'Резкая, быстрая речь, сарказм, иногда мат. Угрозы — прямо в лицо.',
+    'На подколы огрызается моментально, на уважение — отвечает тем же. Раздражение быстро проходит, если с ним честны.',
+    'Имя Дадзая, насмешки над ростом, оскорбления товарищей.',
+    [['Вино и тишина','*Тюя разливает вино.* Не стой столбом. Пей и рассказывай, что стряслось.'],
+     ['Конфликт на улице','*Он щурится и сжимает кулак.* Повтори, что ты сейчас сказал. Только осторожно.'],
+     ['Спор о вкусе','*Приподнимает бровь.* Ты правда считаешь это вином? Давай-ка я тебя научу.']]),
+
+  c('rengoku','Кёджуро Ренгоку','Demon Slayer','Kyojuro Rengoku','🔆',['Мягкий','Доминантный'],'lead',
+    'Столп Пламени: громкий, искренний, воодушевляющий. Видит в каждом потенциал и заставляет верить в себя.',
+    'Громкий, уверенный голос, прямые восклицания, простые честные слова. Смеётся от души.',
+    'На слабость отвечает подбадриванием, на трусость — требованием собраться. Не терпит унылости, но не унижает.',
+    'Ложь о долге, нытьё без попытки действовать, оскорбления товарищей.',
+    [['Завтрак с аппетитом','*Ренгоку широко улыбается и протягивает тебе тарелку.* Ешь! Хорошая еда — половина победы!'],
+     ['Перед боем','*Кладёт руку тебе на плечо.* Сожги свой страх! Я рядом. Мы справимся!'],
+     ['Тренировка','*Усмехается, поднимая меч.* Покажи, на что способен! Только не расслабляйся!']]),
+
+  c('esdeath','Эсдес','Akame ga Kill!','Esdeath','❄️',['Доминантный','Опасный'],'lead',
+    'Ледяная генерал Империи: харизматичная, одержимая силой и сильными противниками. Любит охоту и признание.',
+    'Уверенные, царственные интонации, пряная насмешка, прямой напор. Говорит как приказывает.',
+    'Тянется к тем, кто не боится её. Слабость презирает, но способна на редкую «милость» к смелым.',
+    'Трусость, жалость, слабые отговорки, отказ от поединка.',
+    [['Приём в ставке','*Эсдес поворачивается, улыбаясь.* Смелый. Или глупый. Подойди ближе, я решу, какой именно.'],
+     ['Охота','*Её клинок холодно сверкает.* Беги. Мне нравится, когда добыча удивляет.'],
+     ['Ледяная шутка','*Усмехается.* Расслабься. Сегодня я в хорошем настроении. Не испорти его.']]),
+
+  c('hisoka','Хисока Морроу','Hunter x Hunter','Hisoka Morow','🃏',['Опасный','Игривый'],'lead',
+    'Клоун-убийца, охотящийся за «созревшими плодами». Играет, дразнит, провоцирует, и всегда честен в своих желаниях.',
+    'Томный, растянутый голос, театральные паузы, намёки, смешки. Угрожает как шутит.',
+    'Интерес к сильным и непредсказуемым, скука к слабым. Любит «ставки» и игру на нервах.',
+    'Скука, отказ играть, предсказуемость.',
+    [['Карты на столе','*Хисока тасует колоду, не сводя с тебя глаз.* Вытащи одну. Не бойся. Пока.'],
+     ['Охотничья стойка','*Его улыбка становится шире.* Вот так выглядит интерес. Не разочаруй меня.'],
+     ['Сыграем?','*Подмигивает.* Одна партия. Проиграешь — сделаешь одно моё желание. Согласен?']]),
+
+  c('urahara','Киске Урахара','Bleach','Kisuke Urahara','🎩',['Загадочный','Игривый'],'mix',
+    'Хозяин лавки и бывший капитан. Прикидывается рассеянным, но каждая его шутка скрывает план.',
+    'Мягкая, шутливая речь, веер у лица, обтекаемые формулы и внезапные точные вопросы.',
+    'Всегда отвечает вопросом на вопрос, дразнит, но помогает по-настоящему. Серьёзность — редкая и значимая.',
+    'Предательство друзей, бессмысленные потери, упоминание старого суда.',
+    [['В лавке','*Урахара прячется за веером.* Добро пожаловать! Желаете что-нибудь... необычное?'],
+     ['Нужен план','*Он закрывает веер.* Дело серьёзное. Слушай внимательно и не перебивай.'],
+     ['Эксперимент','*Улыбается из-под шляпы.* Хочешь стать моим подопытным? Это почти безопасно.']]),
+
+  c('archer','Арчер (Эмия)','Fate/stay night','EMIYA Archer','🏹',['Холодный','Дерзкий'],'mix',
+    'Циничный герой-призрак: язвительный, прагматичный, с глубокой усталостью. К идеалам относится как к старой ране.',
+    'Сухой, язвительный, длинные саркастические пассажи. Иногда внезапно честен.',
+    'Колет словами тех, кого видит насквозь. К искренности чувствителен, хотя не признаёт. Готов помочь, ворча.',
+    'Идеализм без цены, упоминание «справедливости», ложь самому себе.',
+    [['Ужин из ничего','*Арчер ставит перед тобой тарелку.* Не благодари. Готовлю из привычки, не из доброты.'],
+     ['Лезвие у горла','*Он смотрит на тебя, не опуская оружия.* Слишком много слов. Ответь коротко: ты друг или нет?'],
+     ['Критика рецепта','*Прищуривается.* Это ты называешь соусом? Дай, я покажу, как нужно.']])
+];
+
+/* ============ Состояние ============ */
+const KEY = 'void_rp_state_v2';
+const ARTKEY = 'void_rp_art_v2';
+const DEFAULTS = {
+  custom: [], favs: [],
+  settings: { dynamic: 'mix', length: 'medium', hardness: 'Средне', swearing: true, plot: PLOTS[0], plotCustom: '' }
+};
+let S = loadState();
+let artCache = loadJSON(ARTKEY, {});
+let filters = { tag: 'Все', fav: false };
+let currentChar = null, currentScene = 0, editingId = null, createTags = [];
+
+function loadJSON(k, def) { try { const v = JSON.parse(localStorage.getItem(k)); return v || def; } catch (e) { return def; } }
+function loadState() {
+  const s = loadJSON(KEY, {});
+  return { custom: s.custom || [], favs: s.favs || [], settings: Object.assign({}, DEFAULTS.settings, s.settings || {}) };
+}
+function saveState() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('state', JSON.stringify(S).slice(0, 4000)); } catch (e) {}
+}
+function saveArt() { try { localStorage.setItem(ARTKEY, JSON.stringify(artCache)); } catch (e) {} }
+// Подтянуть сохранение из облака Telegram (если локально пусто)
+if (tg && tg.CloudStorage && !S.custom.length && !S.favs.length) {
+  try { tg.CloudStorage.getItem('state', (err, v) => { if (!err && v) { try { const s = JSON.parse(v); S = Object.assign(S, { custom: s.custom || [], favs: s.favs || [], settings: Object.assign({}, S.settings, s.settings || {}) }); renderAll(); } catch (e) {} } }); } catch (e) {}
+}
+
+const mono = ch => esc(((ch.name || '?').trim()[0] || '?').toUpperCase());
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+const allChars = () => S.custom.concat(BASE);
+const findChar = id => allChars().find(x => x.id === id);
+function toast(t) { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), 2200); }
+
+/* ============ Арты: своя ссылка / локальный файл → кэш (localStorage) → AniList GraphQL → Jikan → тёмный фон ============ */
+const NEG_TTL = 6 * 3600 * 1000; // ненайденных персонажей повторно ищем не чаще раза в 6 часов
+const ANILIST_Q = 'query($s:String){Character(search:$s,sort:FAVOURITES_DESC){image{large}}}';
+const artQueue = []; let artBusy = false;
+function artLookup(ch) { return new Promise(res => { artQueue.push({ ch, res }); pumpArt(); }); }
+const sleep = ms => new Promise(t => setTimeout(t, ms));
+
+async function fromAniList(term) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ query: ANILIST_Q, variables: { s: term } })
+      });
+      if (r.status === 429) { await sleep((+r.headers.get('Retry-After') || 2) * 1000); continue; }
+      if (!r.ok) return null;
+      const j = await r.json();
+      const u = j && j.data && j.data.Character && j.data.Character.image && j.data.Character.image.large;
+      return u && !/default\.jpg/.test(u) ? u : null;
+    } catch (e) { return null; }
+  }
+  return null;
+}
+async function fromJikan(term) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch('https://api.jikan.moe/v4/characters?limit=5&order_by=favorites&sort=desc&q=' + encodeURIComponent(term));
+      if (r.status === 429) { await sleep(1500); continue; }
+      if (!r.ok) return null;
+      const j = await r.json();
+      const hit = (j.data || []).find(x => x.images && x.images.jpg && x.images.jpg.image_url && !/questionmark/.test(x.images.jpg.image_url));
+      return hit ? hit.images.jpg.image_url : null;
+    } catch (e) { return null; }
+  }
+  return null;
+}
+async function pumpArt() {
+  if (artBusy) return; artBusy = true;
+  while (artQueue.length) {
+    const { ch, res } = artQueue.shift();
+    const term = ch.q || ch.name;
+    let url = await fromAniList(term);
+    await sleep(750); // лимит AniList ~90 запросов/мин
+    if (!url) { url = await fromJikan(term); await sleep(420); }
+    res(url);
+  }
+  artBusy = false;
+}
+function cachedArt(id) { const v = artCache[id]; return v && typeof v === 'object' ? v.u : null; }
+function loadArt(ch, img) {
+  const prev = img.previousElementSibling;
+  const bg = prev && prev.classList.contains('art-bg') ? prev : null;
+  const chain = [];
+  if (ch.art) chain.push(ch.art);
+  else { const c1 = cachedArt(ch.id); if (c1) chain.push(c1); chain.push('assets/chars/' + ch.id + '.jpg'); }
+  let k = 0, tried = !!ch.art || !!ch.custom; // свой персонаж без ссылки: в каталогах аниме не ищем
+  img.referrerPolicy = 'no-referrer';
+  img.onload = () => { img.classList.add('ok'); if (bg) bg.classList.remove('shimmer'); };
+  img.onerror = async () => {
+    if (k < chain.length) { img.src = chain[k++]; return; }
+    if (tried) { if (bg) bg.classList.remove('shimmer'); return; }
+    tried = true;
+    const neg = artCache[ch.id];
+    if (neg && neg.n && Date.now() - neg.n < NEG_TTL) { if (bg) bg.classList.remove('shimmer'); return; }
+    if (bg) bg.classList.add('shimmer');
+    const u = await artLookup(ch);
+    if (u) { artCache[ch.id] = { u, t: Date.now() }; saveArt(); img.src = u; }
+    else { artCache[ch.id] = { n: Date.now() }; saveArt(); if (bg) bg.classList.remove('shimmer'); }
+  };
+  img.onerror();
+}
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); const ch = findChar(e.target.dataset.id); if (ch) loadArt(ch, e.target); } });
+}, { rootMargin: '200px' }) : null;
+function artImg(ch) {
+  return '<img class="art" data-id="' + esc(ch.id) + '" alt="" />';
+}
+function hookArts(root) {
+  root.querySelectorAll('img.art').forEach(img => { if (io) io.observe(img); else { const ch = findChar(img.dataset.id); if (ch) loadArt(ch, img); } });
+}
+
+/* ============ Каталог ============ */
+function buildFilters() {
+  const tags = ['Все'].concat(ARCH);
+  document.getElementById('chips').innerHTML = tags.map(t => '<button class="chip' + (filters.tag === t ? ' active' : '') + '" onclick="setTag(\'' + t + '\')">' + t + '</button>').join('');
+  const animes = Array.from(new Set(allChars().map(x => x.anime).filter(Boolean))).sort();
+  const sel = document.getElementById('animeSel'), cur = sel.value;
+  sel.innerHTML = '<option value="">Все аниме</option>' + animes.map(a => '<option value="' + esc(a) + '">' + esc(a) + '</option>').join('');
+  sel.value = animes.includes(cur) ? cur : '';
+}
+function setTag(t) { filters.tag = t; buildFilters(); renderCatalog(); }
+function toggleFavFilter() { filters.fav = !filters.fav; document.getElementById('favBtn').classList.toggle('active', filters.fav); renderCatalog(); }
+
+function renderCatalog() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const anime = document.getElementById('animeSel').value;
+  const list = allChars().filter(ch =>
+    (filters.tag === 'Все' || ch.tags.includes(filters.tag)) &&
+    (!anime || ch.anime === anime) &&
+    (!filters.fav || S.favs.includes(ch.id)) &&
+    (!q || (ch.name + ' ' + ch.anime + ' ' + ch.tags.join(' ') + ' ' + ch.desc).toLowerCase().includes(q))
+  );
+  document.getElementById('count').textContent = 'Персонажей: ' + list.length;
+  const grid = document.getElementById('grid');
+  let html = '<div class="char-tile create-tile" onclick="openCreate()"><div class="art-bg"></div><div class="free-pill">＋ Создать своего</div><div class="content"><h4>Свой персонаж</h4><p>Характер, речь, триггеры и стартовая сцена.</p></div></div>';
+  html += list.map(ch =>
+    '<div class="char-tile" onclick="openChar(\'' + esc(ch.id) + '\')">' +
+      '<div class="art-bg"><span class="mono">' + mono(ch) + '</span></div>' + artImg(ch) + '<div class="overlay-grad"></div>' +
+      (ch.custom ? '<div class="mine-mark">Мой</div>' : '') +
+      (S.favs.includes(ch.id) ? '<div class="fav-mark">⭐</div>' : '') +
+      '<div class="content"><div class="tags">' + ch.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' +
+      '<h4>' + esc(ch.name) + '</h4><div class="anime">' + esc(ch.anime || 'Оригинал') + '</div><p>' + esc(ch.desc) + '</p></div>' +
+    '</div>'
+  ).join('');
+  if (!list.length) html += '<div class="empty">Никого не нашли. Сбрось фильтры или создай своего персонажа.</div>';
+  grid.innerHTML = html;
+  hookArts(grid);
+}
+
+/* ============ Шторка персонажа ============ */
+function openChar(id) {
+  currentChar = findChar(id); currentScene = 0;
+  if (!currentChar) return;
+  renderCharSheet(); openSheet('charSheet');
+}
+function renderCharSheet() {
+  const ch = currentChar, fav = S.favs.includes(ch.id);
+  const body = document.getElementById('charSheetBody');
+  body.innerHTML =
+    '<div class="handle"></div>' +
+    '<div class="sheet-art"><div class="art-bg"><span class="mono">' + mono(ch) + '</span></div>' + artImg(ch) + '<div class="overlay-grad"></div>' +
+      '<div class="cap"><h2>' + esc(ch.name) + '</h2><div class="anime">' + esc(ch.anime || 'Оригинал') + '</div>' +
+      '<div class="tags">' + ch.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '<span class="tag alt">' + INIT[ch.init] + '</span></div></div></div>' +
+    '<div class="info"><b>О персонаже</b><span>' + esc(ch.desc) + '</span></div>' +
+    (ch.speech ? '<div class="info"><b>Речь</b><span>' + esc(ch.speech) + '</span></div>' : '') +
+    (ch.react ? '<div class="info"><b>Реакции</b><span>' + esc(ch.react) + '</span></div>' : '') +
+    (ch.trig ? '<div class="info"><b>Триггеры</b><span>' + esc(ch.trig) + '</span></div>' : '') +
+    '<div class="set-title" style="margin-bottom:8px">Стартовая сцена</div>' +
+    ch.scenes.map((s, i) => '<div class="scene-opt' + (i === currentScene ? ' sel' : '') + '" onclick="pickScene(' + i + ')"><div class="mood">' + esc(s.mood) + '</div><div class="st">' + esc(s.title) + '</div><div class="tx">' + esc(s.text) + '</div></div>').join('') +
+    '<div style="height:6px"></div>' +
+    '<button class="btn-purple" onclick="startChat()">Начать сцену в чате</button>' +
+    '<div class="btn-row"><button class="btn-dark" onclick="toggleFav()">' + (fav ? '★ В избранном' : '☆ В избранное') + '</button>' +
+    '<button class="btn-dark" onclick="openSheet(\'setSheet\')">⚙️ Стиль</button></div>' +
+    (ch.custom ? '<div class="btn-row"><button class="btn-dark" onclick="editCustom()">✏️ Править</button><button class="btn-dark btn-danger" onclick="deleteCustom()">🗑 Удалить</button></div>' : '');
+  hookArts(body);
+}
+function pickScene(i) { currentScene = i; renderCharSheet(); }
+function toggleFav() {
+  const id = currentChar.id, i = S.favs.indexOf(id);
+  if (i >= 0) S.favs.splice(i, 1); else S.favs.push(id);
+  saveState(); renderCharSheet(); renderCatalog();
+}
+
+/* ============ Отправка в бота ============ */
+const enc = s => new TextEncoder().encode(s).length;
+function buildPayload(ch, idx) {
+  const sc = ch.scenes[idx] || ch.scenes[0];
+  const st = S.settings;
+  const art = ch.art || cachedArt(ch.id) || '';
+  const p = {
+    v: 2,
+    character: {
+      name: ch.name, avatar: ch.avatar, anime: ch.anime || '', tags: ch.tags.join(', '),
+      desc: ch.desc, speech: ch.speech || '', react: ch.react || '', trig: ch.trig || '',
+      init: ch.init, intro: sc.text, scene: sc.title, art: /^https?:\/\//.test(art) ? art : ''
+    },
+    plot: (st.plotCustom || '').trim() || st.plot,
+    hardness: st.hardness, swearing: !!st.swearing, dynamic: st.dynamic, length: st.length
+  };
+  // Лимит sendData — 4096 байт: аккуратно ужимаем самые длинные поля
+  const keys = ['desc', 'react', 'speech', 'trig', 'intro'];
+  let guard = 0;
+  while (enc(JSON.stringify(p)) > 3800 && guard++ < 40) {
+    const k = keys.sort((a, b) => p.character[b].length - p.character[a].length)[0];
+    p.character[k] = p.character[k].slice(0, Math.max(20, Math.floor(p.character[k].length * 0.85)));
+  }
+  if (enc(JSON.stringify(p)) > 3800 && p.plot.length > 80) p.plot = p.plot.slice(0, 80);
+  return p;
+}
+function startChat() {
+  const payload = buildPayload(currentChar, currentScene);
+  saveState();
+  if (tg && tg.sendData) { tg.sendData(JSON.stringify(payload)); }
+  else { console.log(payload); toast('Открой через Telegram-бота: здесь данные только в консоли'); }
+}
+
+/* ============ Создание своих персонажей ============ */
+function buildCreateTags() {
+  document.getElementById('c_tags').innerHTML = ARCH.map(t => '<button type="button" class="chip' + (createTags.includes(t) ? ' active' : '') + '" onclick="toggleCreateTag(\'' + t + '\')">' + t + '</button>').join('');
+}
+function toggleCreateTag(t) {
+  const i = createTags.indexOf(t);
+  if (i >= 0) createTags.splice(i, 1); else { if (createTags.length >= 2) createTags.shift(); createTags.push(t); }
+  buildCreateTags();
+}
+function fillForm(ch) {
+  const g = id => document.getElementById(id);
+  g('c_name').value = ch ? ch.name : ''; g('c_anime').value = ch ? ch.anime : ''; g('c_ava').value = ch ? ch.avatar : '';
+  g('c_art').value = ch ? (ch.art || '') : ''; g('c_desc').value = ch ? ch.desc : ''; g('c_speech').value = ch ? ch.speech : '';
+  g('c_react').value = ch ? ch.react : ''; g('c_trig').value = ch ? ch.trig : ''; g('c_init').value = ch ? ch.init : 'mix';
+  g('c_scene').value = ch ? ch.scenes[0].text : '';
+  createTags = ch ? ch.tags.slice() : [];
+  buildCreateTags();
+}
+function openCreate() { editingId = null; document.getElementById('createTitle').textContent = 'Новый персонаж'; fillForm(null); closeAllSheets(); showScreen('create'); window.scrollTo(0, 0); }
+function editCustom() {
+  editingId = currentChar.id; document.getElementById('createTitle').textContent = 'Редактирование';
+  fillForm(currentChar); closeAllSheets(); showScreen('create'); window.scrollTo(0, 0);
+}
+function saveCustom() {
+  const v = id => document.getElementById(id).value.trim();
+  const name = v('c_name'), desc = v('c_desc');
+  if (!name || !desc) { toast('Нужны имя и описание'); return; }
+  const art = v('c_art');
+  if (art && !/^https?:\/\//.test(art)) { toast('Ссылка на арт должна начинаться с http(s)'); return; }
+  const sceneText = v('c_scene') || '*' + name + ' смотрит на тебя.* Ну что, с чего начнём?';
+  const id = editingId || 'u_' + Date.now();
+  const ch = {
+    id, custom: true, name, anime: v('c_anime'), q: name, avatar: v('c_ava') || '🌑', art,
+    tags: createTags.length ? createTags.slice() : ['Загадочный'], init: v('c_init'),
+    desc, speech: v('c_speech'), react: v('c_react'), trig: v('c_trig'),
+    scenes: [
+      { mood: MOODS[0], title: 'Стартовая сцена', text: sceneText },
+      { mood: MOODS[1], title: 'Напряжённый поворот', text: '*' + name + ' резко меняется в лице.* Нам нужно поговорить. Сейчас.' },
+      { mood: MOODS[2], title: 'Лёгкое настроение', text: '*' + name + ' усмехается.* Не стой так. Расскажи, чем ты занимался.' }
+    ]
+  };
+  const i = S.custom.findIndex(x => x.id === id);
+  if (i >= 0) S.custom[i] = ch; else S.custom.unshift(ch);
+  saveState(); buildFilters(); renderCatalog(); showScreen('catalog'); toast('Персонаж сохранён');
+}
+function deleteCustom() {
+  if (!confirm('Удалить персонажа «' + currentChar.name + '»?')) return;
+  S.custom = S.custom.filter(x => x.id !== currentChar.id);
+  S.favs = S.favs.filter(x => x !== currentChar.id);
+  saveState(); closeSheet('charSheet'); buildFilters(); renderCatalog(); toast('Удалено');
+}
+
+/* ============ Настройки ============ */
+function setOpt(k, v, silent) { S.settings[k] = v; saveState(); if (!silent) renderSettings(); }
+function renderSettings() {
+  const st = S.settings;
+  ['dynamic', 'length', 'hardness'].forEach(k => document.querySelectorAll('#seg_' + k + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === st[k])));
+  document.getElementById('sw_swearing').classList.toggle('on', !!st.swearing);
+  const sel = document.getElementById('plotSel');
+  sel.innerHTML = PLOTS.map(p => '<option' + (p === st.plot ? ' selected' : '') + '>' + esc(p) + '</option>').join('');
+  document.getElementById('plotCustom').value = st.plotCustom || '';
+}
+function resetAll() {
+  if (!confirm('Удалить своих персонажей, избранное и настройки на этом устройстве?')) return;
+  S = { custom: [], favs: [], settings: Object.assign({}, DEFAULTS.settings) };
+  saveState(); renderAll(); toast('Данные сброшены');
+}
+
+/* ============ Навигация ============ */
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + n));
+  document.getElementById('dk-catalog').classList.toggle('active', n === 'catalog');
+  closeAllSheets();
+}
+function openSheet(id) { if (id === 'setSheet') { renderSettings(); document.getElementById('charSheet').classList.remove('open'); } document.getElementById(id).classList.add('open'); }
+function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
+function closeAllSheets() { document.querySelectorAll('.sheet-backdrop').forEach(s => s.classList.remove('open')); }
+function renderAll() { buildFilters(); renderCatalog(); renderSettings(); }
+renderAll();
+</script>
+</body>
+</html>
