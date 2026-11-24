@@ -35,30 +35,6 @@
       padding: 12px 12px 92px 12px;
     }
 
-    .anim-float {
-      animation: floatY 3s ease-in-out infinite;
-    }
-    .anim-pulse {
-      animation: pulseGlow 2.4s ease-in-out infinite;
-    }
-    .anim-spin-slow {
-      animation: spinSlow 9s linear infinite;
-      transform-origin: center;
-    }
-
-    @keyframes floatY {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-3px); }
-    }
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 0.78; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.06); }
-    }
-    @keyframes spinSlow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
     .screen { display: none; }
     .screen.active { display: block; animation: fadeIn 0.2s ease; }
 
@@ -131,7 +107,7 @@
 
     .card {
       position: relative;
-      height: 255px;
+      height: 260px;
       border-radius: 18px;
       overflow: hidden;
       background: var(--panel);
@@ -152,8 +128,9 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 20%;
+      object-position: center 18%;
       display: block;
+      background: linear-gradient(180deg, #171426, #08080d);
     }
 
     .card-grad {
@@ -161,8 +138,8 @@
       inset: 0;
       background: linear-gradient(
         180deg,
-        rgba(6, 6, 9, 0.12) 0%,
-        rgba(6, 6, 9, 0.25) 45%,
+        rgba(6, 6, 9, 0.08) 0%,
+        rgba(6, 6, 9, 0.2) 45%,
         rgba(6, 6, 9, 0.96) 92%
       );
       pointer-events: none;
@@ -174,6 +151,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 6px;
     }
 
     .role-tag {
@@ -182,7 +160,7 @@
       letter-spacing: 0.03em;
       padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(6, 6, 9, 0.78);
+      background: rgba(6, 6, 9, 0.82);
       backdrop-filter: blur(8px);
       border: 1px solid var(--line);
       text-transform: uppercase;
@@ -190,6 +168,20 @@
     .role-tag.dom { color: #fda4af; border-color: rgba(225, 29, 72, 0.5); }
     .role-tag.sub { color: #d8b4fe; border-color: rgba(168, 85, 247, 0.5); }
     .role-tag.brat { color: #fcd34d; border-color: rgba(245, 158, 11, 0.5); }
+
+    .anime-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: rgba(6, 6, 9, 0.75);
+      color: #c7c6d4;
+      border: 1px solid rgba(255,255,255,0.08);
+      max-width: 96px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .card-body {
       position: relative;
@@ -274,6 +266,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -288,10 +281,16 @@
       min-width: 0;
     }
 
+    .hero-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
     .room-ava-frame {
       width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      height: 56px;
+      border-radius: 12px;
       background: var(--panel-2);
       border: 1px solid var(--line-strong);
       overflow: hidden;
@@ -301,7 +300,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 20%;
+      object-position: center 18%;
       display: block;
     }
 
@@ -349,9 +348,9 @@
     }
 
     .picker-ava {
-      width: 78px;
-      height: 92px;
-      border-radius: 16px;
+      width: 82px;
+      height: 104px;
+      border-radius: 14px;
       background: var(--panel-2);
       border: 1px solid var(--line-strong);
       overflow: hidden;
@@ -361,7 +360,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 20%;
+      object-position: center 18%;
       display: block;
     }
 
@@ -578,13 +577,13 @@
   <div class="screen active" id="screen-catalog">
     <div class="top-bar">
       <div class="search-wrap">
-        <svg class="anim-pulse" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b8a99" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b8a99" stroke-width="2">
           <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
         </svg>
-        <input id="q" placeholder="Поиск персонажа или характера..." oninput="renderGrid()" />
+        <input id="q" placeholder="Поиск персонажа, аниме или характера..." oninput="renderGrid()" />
       </div>
       <button class="icon-btn" onclick="openCreate()" title="Создать персонажа">
-        <svg class="anim-float" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M12 5v14M5 12h14"/>
         </svg>
       </button>
@@ -608,7 +607,7 @@
         </svg>
       </button>
       <button class="dock-item" onclick="openActiveOrFirst()" title="Активный диалог">
-        <svg class="anim-float" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
       </button>
@@ -618,7 +617,7 @@
         </svg>
       </button>
       <button class="dock-item" onclick="openStyle()" title="Стиль и тон">
-        <svg class="anim-spin-slow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
@@ -639,11 +638,18 @@
           <div class="hero-sub" id="room-sub">Характер и сцена</div>
         </div>
       </div>
-      <button class="icon-btn" onclick="resetRoom()" title="Сбросить сцену">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
-        </svg>
-      </button>
+      <div class="hero-actions">
+        <button class="icon-btn" onclick="cycleCharArt()" title="Другой арт персонажа">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="resetRoom()" title="Сбросить сцену">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="scene-picker" id="scene-picker">
@@ -671,12 +677,6 @@
       </div>
       <div class="tools-row">
         <button class="tool-pill on" id="pill-mode" onclick="toggleDominance()">Доминация: Авто</button>
-        <button class="tool-pill" onclick="requestSceneArt()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
-          </svg>
-          Арт
-        </button>
         <button class="tool-pill" onclick="openStyle()">Стиль</button>
       </div>
     </div>
@@ -686,17 +686,17 @@
     <div class="sheet">
       <div class="grip"></div>
       <h3>Новый персонаж</h3>
-      <label>Имя</label>
-      <input id="c-name" placeholder="Например: Аврора" />
+      <label>Имя персонажа (на англ. или рус. для поиска арта в AniList)</label>
+      <input id="c-name" placeholder="Например: Makima или Эсдес" />
+      <label>Аниме / тайтл (необязательно)</label>
+      <input id="c-anime" placeholder="Например: Chainsaw Man" />
       <label>Характер / динамика</label>
       <select id="c-vibe">
         <option value="dom">Доминирующая</option>
         <option value="sub">Не доминирующая (мягкая / ведомая)</option>
         <option value="brat">Дерзкая / колкая</option>
       </select>
-      <label>Внешность для генерации арта (на англ. или рус.)</label>
-      <input id="c-look" placeholder="Например: dark hair, crimson eyes, black leather jacket, night city" />
-      <label>Ссылка на свою картинку (необязательно)</label>
+      <label>Прямая ссылка на картинку (необязательно)</label>
       <input id="c-img" placeholder="https://..." />
       <label>Описание характера</label>
       <textarea id="c-desc" placeholder="Как общается, кто ведёт сцену, детали образа..."></textarea>
@@ -744,101 +744,86 @@
 
     const characters = [
       {
-        id: "veronika",
-        name: "Вероника",
+        id: "esdeath",
+        name: "Эсдес",
+        queryName: "Esdeath",
+        anime: "Akame ga Kill!",
         vibe: "dom",
         roleLabel: "Доминирующая",
         desc: "Холодная, властная и расчётливая. Берёт инициативу в свои руки и диктует правила сцены.",
-        artPrompt: "anime woman portrait, cold dominant expression, sharp piercing dark eyes, sleek dark hair, dark crimson and black outfit, moody night penthouse lighting, high detail anime art",
-        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b0a1a"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g1)"/><circle cx="100" cy="105" r="70" fill="#881337" opacity="0.25"/></svg>`,
         plots: [
-          { title: "Приказ в пустом пентхаусе", text: "Поздний вечер, панорамные окна, она медленно поворачивается к тебе с бокалом в руке и не оставляет выбора." },
-          { title: "Допрос после сделки", text: "Приглушённый свет, закрытая дверь и прямой взгляд: ей нужны ответы, а не оправдания." }
+          { title: "Приказ в пустом кабинете", text: "Поздний вечер, она медленно поворачивается к тебе с ледяным спокойствием и не оставляет выбора." },
+          { title: "Проверка на прочность", text: "Закрытая дверь и прямой взгляд: ей нужны действия, а не оправдания." }
         ]
       },
       {
-        id: "rina",
-        name: "Рина",
+        id: "olivier",
+        name: "Оливье Армстронг",
+        queryName: "Olivier Mira Armstrong",
+        anime: "Fullmetal Alchemist",
         vibe: "dom",
         roleLabel: "Доминирующая",
-        desc: "Уверенная, насмешливая, привыкла контролировать ситуацию и не терпит неподчинения.",
-        artPrompt: "anime girl portrait, confident smirking dominant expression, violet eyes, dark purple hair, dark edgy fashion, neon purple rim light, detailed anime illustration",
-        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b0764"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g2)"/><circle cx="100" cy="105" r="70" fill="#9333ea" opacity="0.25"/></svg>`,
+        desc: "Уверенная, жёсткая и прямолинейная. Привыкла контролировать ситуацию и не терпит слабины.",
         plots: [
-          { title: "Ночная студия без лишних слов", text: "Она садится на край стола и спокойно смотрит сверху вниз, проверяя твои нервы." },
-          { title: "Игра на твоих условиях", text: "Ставка сделана, и именно Рина решает, какой шаг будет следующим." }
+          { title: "Разговор без лишних слов", text: "Она садится на край стола и спокойно смотрит сверху вниз, проверяя твои нервы." },
+          { title: "Жёсткие условия", text: "Правила заданы заранее, и именно она решает, как пойдёт дальше сцена." }
         ]
       },
       {
-        id: "miya",
-        name: "Мия",
+        id: "violet",
+        name: "Вайолет Эвергарден",
+        queryName: "Violet Evergarden",
+        anime: "Violet Evergarden",
         vibe: "sub",
         roleLabel: "Не доминирующая",
-        desc: "Тихая, мягкая и податливая. Легко смущается, ждёт твоего решения и охотно следует за тобой.",
-        artPrompt: "anime girl portrait, soft shy gentle expression, big violet eyes, long dark hair, oversized dark hoodie, warm dim night lighting, detailed anime artwork",
-        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g3)"/><circle cx="100" cy="105" r="70" fill="#6366f1" opacity="0.25"/></svg>`,
+        desc: "Сдержанная, внимательная и податливая. Ждёт твоего решения и чётко следует за твоим ходом.",
         plots: [
-          { title: "Тихая ночь после дождя", text: "Она сидит на диване в оверсайз-худи, чуть робея, и тихо ждёт, что ты скажешь первым." },
-          { title: "Доверие без лишнего шума", text: "Приглушённый свет, спокойная обстановка — Мия полностью полагается на твой ход." }
+          { title: "Тихий вечер за письмами", text: "На столе лампа и чистые листы; она внимательно ждёт, что ты скажешь первым." },
+          { title: "Спокойный разговор", text: "Приглушённый свет, ровная тишина — она полностью полагается на твою инициативу." }
         ]
       },
       {
-        id: "alisa",
-        name: "Алиса",
+        id: "holo",
+        name: "Холо",
+        queryName: "Holo",
+        anime: "Spice and Wolf",
         vibe: "sub",
         roleLabel: "Не доминирующая",
-        desc: "Нежная, уступчивая и внимательная к деталям. Не спорит за лидерство, ей комфортно рядом с сильным партнёром.",
-        artPrompt: "anime girl portrait, sweet gentle expression, soft lavender eyes, silver-white hair, dark aesthetic outfit, soft evening light, high detail anime portrait",
-        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2e1065"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g4)"/><circle cx="100" cy="105" r="70" fill="#a855f7" opacity="0.22"/></svg>`,
+        desc: "Утончённая, мягкая и наблюдательная. Рядом с надёжным партнёром легко уступает лидерство.",
         plots: [
-          { title: "Поздний ужин на двоих", text: "На кухне тепло и тихо; Алиса поправляет рукав и мягко улыбается, ожидая твоих действий." },
-          { title: "За кулисами съёмки", text: "Усталость после долгого дня, она прислоняется к стене и тихо смотрит на тебя." }
+          { title: "Поздний ужин на двоих", text: "В комнате тепло и тихо; она поправляет рукав и спокойно смотрит на тебя, ожидая твоего шага." },
+          { title: "После долгой дороги", text: "Усталость позади, она присаживается рядом и тихо ждёт твоего решения." }
         ]
       },
       {
         id: "marin",
-        name: "Китагава Марин",
+        name: "Марин Китагава",
+        queryName: "Marin Kitagawa",
+        anime: "My Dress-Up Darling",
         vibe: "brat",
         roleLabel: "Дерзкая",
         desc: "Яркая, живая и прямолинейная. Подкалывает, шутит, но быстро становится искренней.",
-        artPrompt: "Marin Kitagawa anime portrait, playful cheeky expression, bright eyes, blonde hair with dark roots, trendy street style, night city lights, detailed anime art",
-        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#451a03"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g5)"/><circle cx="100" cy="105" r="70" fill="#f59e0b" opacity="0.22"/></svg>`,
         plots: [
-          { title: "Примерка нового образа", text: "В комнате разложены ткани и реквизит, Марин крутится перед зеркалом и с ухмылкой смотрит на тебя." },
-          { title: "Полночный перекус и разговоры", text: "Пустая кухня, две банки напитка и бесконечные истории до утра." }
+          { title: "Примерка нового образа", text: "В комнате разложены ткани и реквизит, Марин смотрит на тебя с лёгкой ухмылкой и ждёт реакции." },
+          { title: "Полночный разговор", text: "Пустая кухня, два напитка и долгие разговоры до утра." }
         ]
       },
       {
-        id: "yuki",
-        name: "Юки",
+        id: "rin",
+        name: "Рин Тосака",
+        queryName: "Rin Tohsaka",
+        anime: "Fate/stay night",
         vibe: "brat",
         roleLabel: "Дерзкая",
-        desc: "Колючая снаружи, но легко выдаёт эмоции, когда её задевают за живое.",
-        artPrompt: "anime girl portrait, bold bratty expression, amber eyes, messy dark hair, street jacket, night rooftop atmosphere, detailed anime art",
-        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#422006"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g6)"/><circle cx="100" cy="105" r="70" fill="#eab308" opacity="0.2"/></svg>`,
+        desc: "Колкая и гордая снаружи, но легко выдаёт эмоции, когда её задевают за живое.",
         plots: [
-          { title: "Крыша ночного города", text: "Ветер треплет волосы, Юки скрещивает руки и бросает вызов: «И что дальше?»" }
+          { title: "Ночь в старом особняке", text: "Рин скрещивает руки и бросает вызов с насмешкой: «И что ты собираешься делать дальше?»" }
         ]
       }
     ];
 
-    function getArtUrl(char) {
-      if (char.customImg) return char.customImg;
-      const basePrompt = char.artPrompt || `${char.name}, ${char.roleLabel} anime girl portrait, moody dark lighting, detailed anime art`;
-      const encoded = encodeURIComponent(basePrompt);
-      return `https://image.pollinations.ai/prompt/${encoded}?width=512&height=640&model=flux&nologo=true&seed=${encodeURIComponent(char.id)}`;
-    }
-
-    function getFallbackDataUrl(char) {
-      const svg = char.fallbackSvg || `<svg width="200" height="260" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="260" fill="#12101c"/></svg>`;
-      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    }
-
-    function buildImgTag(char, cls = "card-art", alt = "") {
-      const src = getArtUrl(char);
-      const fb = getFallbackDataUrl(char);
-      return `<img class="${cls}" src="${src}" alt="${alt || char.name}" loading="lazy" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='${fb}';}" />`;
-    }
+    const artCache = JSON.parse(localStorage.getItem("nocturne_anilist_arts") || "{}");
+    const artIndexMap = {};
 
     let currentFilter = "all";
     let activeChar = null;
@@ -855,6 +840,90 @@
     function allChars() {
       const custom = JSON.parse(localStorage.getItem("nocturne_custom_chars") || "[]");
       return [...characters, ...custom];
+    }
+
+    async function fetchAniListArts(char) {
+      const cacheKey = `${char.queryName || char.name}__${char.anime || ""}`.toLowerCase();
+      if (artCache[cacheKey]?.length) return artCache[cacheKey];
+
+      const query = `
+        query ($search: String) {
+          Character(search: $search) {
+            name { full }
+            image { large medium }
+            media(perPage: 3) {
+              nodes {
+                title { english romaji }
+                coverImage { extraLarge large }
+              }
+            }
+          }
+        }
+      `;
+
+      try {
+        const res = await fetch("https://graphql.anilist.co", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ query, variables: { search: char.queryName || char.name } })
+        });
+        const json = await res.json();
+        const character = json?.data?.Character;
+        const urls = [];
+        if (character?.image?.large) urls.push(character.image.large);
+        if (character?.image?.medium) urls.push(character.image.medium);
+        (character?.media?.nodes || []).forEach(m => {
+          if (m?.coverImage?.extraLarge) urls.push(m.coverImage.extraLarge);
+          if (m?.coverImage?.large) urls.push(m.coverImage.large);
+        });
+
+        const unique = [...new Set(urls.filter(Boolean))];
+        if (unique.length) {
+          artCache[cacheKey] = unique;
+          localStorage.setItem("nocturne_anilist_arts", JSON.stringify(artCache));
+        }
+        return unique;
+      } catch {
+        return [];
+      }
+    }
+
+    function getCurrentCharArt(char) {
+      if (char.customImg) return char.customImg;
+      const cacheKey = `${char.queryName || char.name}__${char.anime || ""}`.toLowerCase();
+      const list = artCache[cacheKey] || [];
+      if (!list.length) return "";
+      const idx = artIndexMap[char.id] || 0;
+      return list[idx % list.length];
+    }
+
+    async function hydrateCardArt(char, imgEl) {
+      if (char.customImg) {
+        imgEl.src = char.customImg;
+        return;
+      }
+      const cached = getCurrentCharArt(char);
+      if (cached) {
+        imgEl.src = cached;
+        return;
+      }
+      const urls = await fetchAniListArts(char);
+      if (urls.length && imgEl.isConnected) {
+        imgEl.src = urls[0];
+      }
+    }
+
+    async function cycleCharArt() {
+      if (!activeChar) return;
+      if (activeChar.customImg) return;
+      const urls = await fetchAniListArts(activeChar);
+      if (!urls.length) return;
+      artIndexMap[activeChar.id] = ((artIndexMap[activeChar.id] || 0) + 1) % urls.length;
+      const nextUrl = getCurrentCharArt(activeChar);
+      document.querySelectorAll("#room-ava img, #picker-ava img").forEach(img => {
+        img.src = nextUrl;
+      });
+      renderGrid();
     }
 
     function setFilter(f, el) {
@@ -874,7 +943,7 @@
       createTile.onclick = openCreate;
       createTile.innerHTML = `
         <div class="create-bg">
-          <svg class="anim-pulse" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8">
             <path d="M12 5v14M5 12h14"/>
           </svg>
         </div>
@@ -882,7 +951,7 @@
         <div class="card-top"><span class="role-tag">Свой</span></div>
         <div class="card-body">
           <h4>Создать персонажа</h4>
-          <p>Характер, доминация или мягкость, арт и свой старт.</p>
+          <p>Имя из аниме, характер, доминация или мягкость и свой старт.</p>
         </div>
       `;
       grid.appendChild(createTile);
@@ -891,39 +960,59 @@
         if (currentFilter === "custom" && !c.custom) return false;
         if (["dom", "sub", "brat"].includes(currentFilter) && c.vibe !== currentFilter) return false;
         if (!q) return true;
-        return c.name.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q) || c.roleLabel.toLowerCase().includes(q);
+        return (
+          c.name.toLowerCase().includes(q) ||
+          (c.anime || "").toLowerCase().includes(q) ||
+          c.desc.toLowerCase().includes(q) ||
+          c.roleLabel.toLowerCase().includes(q)
+        );
       });
 
       list.forEach(c => {
         const tile = document.createElement("div");
         tile.className = "card";
         tile.onclick = () => openChar(c);
+        const initialArt = getCurrentCharArt(c);
         tile.innerHTML = `
-          ${buildImgTag(c, "card-art", c.name)}
+          <img class="card-art" src="${initialArt}" alt="${c.name}" loading="lazy" />
           <div class="card-grad"></div>
           <div class="card-top">
             <span class="role-tag ${c.vibe}">${c.roleLabel}</span>
+            ${c.anime ? `<span class="anime-tag">${c.anime}</span>` : ""}
           </div>
           <div class="card-body">
             <h4>${c.name}</h4>
             <p>${c.desc}</p>
           </div>
         `;
+        const imgEl = tile.querySelector("img.card-art");
+        hydrateCardArt(c, imgEl);
         grid.appendChild(tile);
       });
     }
 
-    function openChar(c) {
+    async function openChar(c) {
       activeChar = c;
       activePlot = null;
       history = [];
       domOverride = "auto";
       updateDomPill();
 
-      document.getElementById("room-ava").innerHTML = buildImgTag(c, "", c.name);
-      document.getElementById("picker-ava").innerHTML = buildImgTag(c, "", c.name);
+      const artUrl = getCurrentCharArt(c);
+      document.getElementById("room-ava").innerHTML = `<img src="${artUrl}" alt="${c.name}" />`;
+      document.getElementById("picker-ava").innerHTML = `<img src="${artUrl}" alt="${c.name}" />`;
+
+      if (!artUrl && !c.customImg) {
+        const urls = await fetchAniListArts(c);
+        if (urls.length && activeChar?.id === c.id) {
+          document.querySelectorAll("#room-ava img, #picker-ava img").forEach(img => {
+            img.src = urls[0];
+          });
+        }
+      }
+
       document.getElementById("room-name").textContent = c.name;
-      document.getElementById("room-sub").textContent = `${c.roleLabel} · выбери сюжет`;
+      document.getElementById("room-sub").textContent = `${c.roleLabel}${c.anime ? " · " + c.anime : ""}`;
       document.getElementById("picker-title").textContent = `${c.name} · ${c.roleLabel}`;
       document.getElementById("picker-desc").textContent = c.desc;
 
@@ -993,33 +1082,6 @@
       setTimeout(() => addBubble("bot", reply), 220);
     }
 
-    function requestSceneArt() {
-      if (!activeChar) return;
-      if (document.getElementById("scene-picker").style.display !== "none") {
-        document.getElementById("scene-picker").style.display = "none";
-      }
-      const last = history[history.length - 1]?.text || activePlot?.text || activeChar.desc;
-      const base = activeChar.artPrompt || `${activeChar.name}, ${activeChar.roleLabel}`;
-      const prompt = encodeURIComponent(`${base}, scene: ${last.slice(0, 90)}, moody lighting, detailed anime art`);
-      const url = `https://image.pollinations.ai/prompt/${prompt}?width=640&height=480&model=flux&nologo=true&t=${Date.now()}`;
-
-      const probe = new Image();
-      probe.onload = () => {
-        addBubble("bot", `Арт для сцены с ${activeChar.name}:`);
-        const stream = document.getElementById("chat-stream");
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "Сцена";
-        img.style.cssText = "max-width:88%;border-radius:14px;border:1px solid var(--line);align-self:flex-start;";
-        stream.appendChild(img);
-        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-      };
-      probe.onerror = () => {
-        addBubble("bot", "Генератор картинок сейчас на лимите — продолжи сцену текстом или попробуй позже.");
-      };
-      probe.src = url;
-    }
-
     function toggleDominance() {
       const order = ["auto", "dom", "sub"];
       domOverride = order[(order.indexOf(domOverride) + 1) % order.length];
@@ -1056,29 +1118,24 @@
 
     function saveCustomChar() {
       const name = document.getElementById("c-name").value.trim();
+      const anime = document.getElementById("c-anime").value.trim();
       const vibe = document.getElementById("c-vibe").value;
-      const look = document.getElementById("c-look").value.trim();
       const customImg = document.getElementById("c-img").value.trim();
       const desc = document.getElementById("c-desc").value.trim() || "Свой персонаж.";
       const plotText = document.getElementById("c-plot").value.trim() || "Сцена начинается.";
       if (!name) return alert("Укажи имя");
 
       const labels = { dom: "Доминирующая", sub: "Не доминирующая", brat: "Дерзкая" };
-      const vibePrompt = {
-        dom: "dominant confident expression, dark moody lighting",
-        sub: "soft shy expression, gentle lighting",
-        brat: "playful bratty smirk, dramatic lighting"
-      };
-
       const item = {
         id: "custom_" + Date.now(),
         name,
+        queryName: name,
+        anime,
         vibe,
         roleLabel: labels[vibe],
         desc,
         custom: true,
         customImg: customImg || "",
-        artPrompt: `${name}, ${look || desc}, ${vibePrompt[vibe]}, detailed anime portrait`,
         plots: [{ title: "Стартовая сцена", text: plotText }]
       };
 
@@ -1087,7 +1144,7 @@
       localStorage.setItem("nocturne_custom_chars", JSON.stringify(custom));
 
       document.getElementById("c-name").value = "";
-      document.getElementById("c-look").value = "";
+      document.getElementById("c-anime").value = "";
       document.getElementById("c-img").value = "";
       document.getElementById("c-desc").value = "";
       document.getElementById("c-plot").value = "";
