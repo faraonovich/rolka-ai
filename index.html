@@ -15,7 +15,7 @@
       --accent: #9333ea;
       --accent-soft: rgba(147, 51, 234, 0.18);
       --text: #f5f5f8;
-      --muted: #8b8a99;
+      --muted: #9a99a8;
     }
 
     * {
@@ -35,16 +35,11 @@
       padding: 12px 12px 92px 12px;
     }
 
-    /* Анимации иконок и аватаров */
     .anim-float {
       animation: floatY 3s ease-in-out infinite;
     }
     .anim-pulse {
       animation: pulseGlow 2.4s ease-in-out infinite;
-    }
-    .anim-tilt {
-      animation: tiltSoft 3.6s ease-in-out infinite;
-      transform-origin: center;
     }
     .anim-spin-slow {
       animation: spinSlow 9s linear infinite;
@@ -56,12 +51,8 @@
       50% { transform: translateY(-3px); }
     }
     @keyframes pulseGlow {
-      0%, 100% { opacity: 0.8; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.05); }
-    }
-    @keyframes tiltSoft {
-      0%, 100% { transform: rotate(-2deg); }
-      50% { transform: rotate(2deg); }
+      0%, 100% { opacity: 0.78; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.06); }
     }
     @keyframes spinSlow {
       from { transform: rotate(0deg); }
@@ -140,8 +131,8 @@
 
     .card {
       position: relative;
-      height: 236px;
-      border-radius: 16px;
+      height: 255px;
+      border-radius: 18px;
       overflow: hidden;
       background: var(--panel);
       border: 1px solid var(--line);
@@ -153,21 +144,28 @@
       transition: transform 0.16s ease, border-color 0.16s ease;
     }
     .card:active { transform: scale(0.98); }
-    .card:hover { border-color: rgba(255, 255, 255, 0.22); }
+    .card:hover { border-color: rgba(255, 255, 255, 0.24); }
 
-    .card-bg {
+    .card-art {
       position: absolute;
       inset: 0;
-      display: grid;
-      place-items: center;
-      padding-bottom: 34px;
-      background: radial-gradient(circle at 50% 34%, rgba(168, 85, 247, 0.14), transparent 65%);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      display: block;
     }
 
     .card-grad {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, transparent 34%, rgba(6, 6, 9, 0.96) 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(6, 6, 9, 0.12) 0%,
+        rgba(6, 6, 9, 0.25) 45%,
+        rgba(6, 6, 9, 0.96) 92%
+      );
+      pointer-events: none;
     }
 
     .card-top {
@@ -184,13 +182,14 @@
       letter-spacing: 0.03em;
       padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(6, 6, 9, 0.82);
+      background: rgba(6, 6, 9, 0.78);
+      backdrop-filter: blur(8px);
       border: 1px solid var(--line);
       text-transform: uppercase;
     }
-    .role-tag.dom { color: #fda4af; border-color: rgba(225, 29, 72, 0.45); }
-    .role-tag.sub { color: #d8b4fe; border-color: rgba(168, 85, 247, 0.45); }
-    .role-tag.brat { color: #fcd34d; border-color: rgba(245, 158, 11, 0.45); }
+    .role-tag.dom { color: #fda4af; border-color: rgba(225, 29, 72, 0.5); }
+    .role-tag.sub { color: #d8b4fe; border-color: rgba(168, 85, 247, 0.5); }
+    .role-tag.brat { color: #fcd34d; border-color: rgba(245, 158, 11, 0.5); }
 
     .card-body {
       position: relative;
@@ -199,14 +198,15 @@
 
     .card-body h4 {
       margin: 0 0 3px 0;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
     }
 
     .card-body p {
       margin: 0;
       font-size: 11px;
-      color: var(--muted);
+      color: #c7c6d4;
       line-height: 1.35;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -214,11 +214,14 @@
       overflow: hidden;
     }
 
-    .create-card .card-bg {
-      padding-bottom: 0;
+    .create-card .create-bg {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
       background:
-        radial-gradient(circle, rgba(255,255,255,0.14) 1px, transparent 1px),
-        linear-gradient(180deg, #111118, #060609);
+        radial-gradient(circle, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+        linear-gradient(180deg, #151221, #060609);
       background-size: 16px 16px, 100% 100%;
     }
 
@@ -286,15 +289,20 @@
     }
 
     .room-ava-frame {
-      width: 46px;
-      height: 46px;
+      width: 48px;
+      height: 48px;
       border-radius: 14px;
       background: var(--panel-2);
       border: 1px solid var(--line-strong);
-      display: grid;
-      place-items: center;
       overflow: hidden;
       flex-shrink: 0;
+    }
+    .room-ava-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      display: block;
     }
 
     .icon-btn {
@@ -329,7 +337,7 @@
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 18px;
-      padding: 16px;
+      padding: 14px;
       margin-bottom: 12px;
     }
 
@@ -341,19 +349,24 @@
     }
 
     .picker-ava {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
+      width: 78px;
+      height: 92px;
+      border-radius: 16px;
       background: var(--panel-2);
-      border: 1px solid var(--line);
-      display: grid;
-      place-items: center;
+      border: 1px solid var(--line-strong);
       overflow: hidden;
       flex-shrink: 0;
     }
+    .picker-ava img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      display: block;
+    }
 
     .scene-picker h3 {
-      margin: 0 0 3px 0;
+      margin: 0 0 4px 0;
       font-size: 16px;
     }
     .scene-picker p {
@@ -681,7 +694,11 @@
         <option value="sub">Не доминирующая (мягкая / ведомая)</option>
         <option value="brat">Дерзкая / колкая</option>
       </select>
-      <label>Описание характера и внешности</label>
+      <label>Внешность для генерации арта (на англ. или рус.)</label>
+      <input id="c-look" placeholder="Например: dark hair, crimson eyes, black leather jacket, night city" />
+      <label>Ссылка на свою картинку (необязательно)</label>
+      <input id="c-img" placeholder="https://..." />
+      <label>Описание характера</label>
       <textarea id="c-desc" placeholder="Как общается, кто ведёт сцену, детали образа..."></textarea>
       <label>Стартовый сюжет</label>
       <textarea id="c-plot" placeholder="С чего начинается ваша сцена..."></textarea>
@@ -725,93 +742,6 @@
     const tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    /* Индивидуальные анимированные SVG-аватары под каждого персонажа */
-    function renderCharAvatar(id, vibe, size = 84) {
-      const portraits = {
-        veronika: `
-          <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-            <circle cx="48" cy="48" r="42" fill="#230b16" stroke="#fb7185" stroke-width="1.8" stroke-opacity="0.5"/>
-            <path d="M22 44c2-20 14-28 26-28s24 8 26 28l3 24H19l3-24Z" fill="#3b0d1e"/>
-            <circle cx="48" cy="48" r="18" fill="#fde2e4"/>
-            <path d="M30 43c5-11 26-13 36 0-5-5-11-7-18-7s-13 2-18 7Z" fill="#1f0812"/>
-            <path class="anim-pulse" d="M36 48l5-2 5 2M50 48l5-2 5 2" stroke="#9f1239" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M43 57c3 2 7 2 10 0" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M32 76c4-8 10-11 16-11s12 3 16 11" fill="#881337"/>
-          </svg>`,
-        rina: `
-          <svg class="anim-tilt" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-            <circle cx="48" cy="48" r="42" fill="#1c0d2b" stroke="#e879f9" stroke-width="1.8" stroke-opacity="0.5"/>
-            <path d="M24 38c4-16 16-23 24-23s20 7 24 23l-6 26H30l-6-26Z" fill="#4a1568"/>
-            <circle cx="48" cy="48" r="18" fill="#fae8ff"/>
-            <path d="M34 47h9M53 47h9" stroke="#581c87" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="M42 57c4 2.5 8 1.5 11-1" stroke="#a21caf" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="#701a75"/>
-          </svg>`,
-        miya: `
-          <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-            <circle cx="48" cy="48" r="42" fill="#151029" stroke="#c4b5fd" stroke-width="1.8" stroke-opacity="0.5"/>
-            <path d="M25 46c0-15 10-27 23-27s23 12 23 27v22H25V46Z" fill="#312e81"/>
-            <circle cx="48" cy="49" r="17.5" fill="#f5f3ff"/>
-            <circle cx="41" cy="49" r="2.6" fill="#312e81"/>
-            <circle cx="55" cy="49" r="2.6" fill="#312e81"/>
-            <circle cx="37" cy="54" r="3.5" fill="#f472b6" fill-opacity="0.45"/>
-            <circle cx="59" cy="54" r="3.5" fill="#f472b6" fill-opacity="0.45"/>
-            <circle cx="48" cy="57" r="2" fill="#9333ea"/>
-            <path d="M32 76c4-7.5 10-10.5 16-10.5s12 3 16 10.5" fill="#4338ca"/>
-          </svg>`,
-        alisa: `
-          <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-            <circle cx="48" cy="48" r="42" fill="#181126" stroke="#d8b4fe" stroke-width="1.8" stroke-opacity="0.5"/>
-            <circle cx="28" cy="34" r="9" fill="#581c87"/>
-            <circle cx="68" cy="34" r="9" fill="#581c87"/>
-            <circle cx="48" cy="49" r="17.5" fill="#faf5ff"/>
-            <path d="M38 49c1.5-2 4.5-2 6 0M52 49c1.5-2 4.5-2 6 0" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M44 57c2.5 2 5.5 2 8 0" stroke="#9333ea" stroke-width="2" stroke-linecap="round"/>
-            <path d="M32 76c4-7.5 10-10.5 16-10.5s12 3 16 10.5" fill="#581c87"/>
-          </svg>`,
-        marin: `
-          <svg class="anim-tilt" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-            <circle cx="48" cy="48" r="42" fill="#24180b" stroke="#fbbf24" stroke-width="1.8" stroke-opacity="0.55"/>
-            <path d="M22 45c2-20 14-29 26-29s24 9 26 29l4 23H18l4-23Z" fill="#92400e"/>
-            <circle cx="48" cy="49" r="17.5" fill="#fffbeb"/>
-            <circle cx="41" cy="48" r="3" fill="#be185d"/>
-            <circle cx="55" cy="48" r="3" fill="#be185d"/>
-            <path d="M42 56.5c3.5 3.5 8.5 3.5 12 0" stroke="#db2777" stroke-width="2.2" stroke-linecap="round"/>
-            <path class="anim-pulse" d="M71 22l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#fbbf24"/>
-            <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="#b45309"/>
-          </svg>`,
-        yuki: `
-          <svg class="anim-pulse" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-            <circle cx="48" cy="48" r="42" fill="#1f150b" stroke="#f59e0b" stroke-width="1.8" stroke-opacity="0.5"/>
-            <path d="M25 44l6-22 10 9 7-13 7 13 10-9 6 22-4 20H29l-4-20Z" fill="#78350f"/>
-            <circle cx="48" cy="49" r="17.5" fill="#fef3c7"/>
-            <path d="M36 46l9 3M60 46l-9 3" stroke="#451a03" stroke-width="2.3" stroke-linecap="round"/>
-            <path d="M43 57.5h10" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="#92400e"/>
-          </svg>`
-      };
-
-      if (portraits[id]) return portraits[id];
-
-      const colorMap = {
-        dom: { bg: "#230b16", stroke: "#fb7185", hair: "#4c0519", shirt: "#881337" },
-        sub: { bg: "#151029", stroke: "#c4b5fd", hair: "#312e81", shirt: "#4338ca" },
-        brat: { bg: "#24180b", stroke: "#fbbf24", hair: "#92400e", shirt: "#b45309" }
-      };
-      const pal = colorMap[vibe] || colorMap.sub;
-
-      return `
-        <svg class="anim-float" width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-          <circle cx="48" cy="48" r="42" fill="${pal.bg}" stroke="${pal.stroke}" stroke-width="1.8" stroke-opacity="0.5"/>
-          <path d="M24 45c2-19 13-28 24-28s22 9 24 28l3 22H21l3-22Z" fill="${pal.hair}"/>
-          <circle cx="48" cy="49" r="17.5" fill="#f5f3ff"/>
-          <circle cx="41" cy="49" r="2.6" fill="#1e1b4b"/>
-          <circle cx="55" cy="49" r="2.6" fill="#1e1b4b"/>
-          <path d="M43 57c3 2 7 2 10 0" stroke="#7e22ce" stroke-width="2.2" stroke-linecap="round"/>
-          <path d="M31 76c4-8 10-11 17-11s13 3 17 11" fill="${pal.shirt}"/>
-        </svg>`;
-    }
-
     const characters = [
       {
         id: "veronika",
@@ -819,6 +749,8 @@
         vibe: "dom",
         roleLabel: "Доминирующая",
         desc: "Холодная, властная и расчётливая. Берёт инициативу в свои руки и диктует правила сцены.",
+        artPrompt: "anime woman portrait, cold dominant expression, sharp piercing dark eyes, sleek dark hair, dark crimson and black outfit, moody night penthouse lighting, high detail anime art",
+        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b0a1a"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g1)"/><circle cx="100" cy="105" r="70" fill="#881337" opacity="0.25"/></svg>`,
         plots: [
           { title: "Приказ в пустом пентхаусе", text: "Поздний вечер, панорамные окна, она медленно поворачивается к тебе с бокалом в руке и не оставляет выбора." },
           { title: "Допрос после сделки", text: "Приглушённый свет, закрытая дверь и прямой взгляд: ей нужны ответы, а не оправдания." }
@@ -830,6 +762,8 @@
         vibe: "dom",
         roleLabel: "Доминирующая",
         desc: "Уверенная, насмешливая, привыкла контролировать ситуацию и не терпит неподчинения.",
+        artPrompt: "anime girl portrait, confident smirking dominant expression, violet eyes, dark purple hair, dark edgy fashion, neon purple rim light, detailed anime illustration",
+        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b0764"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g2)"/><circle cx="100" cy="105" r="70" fill="#9333ea" opacity="0.25"/></svg>`,
         plots: [
           { title: "Ночная студия без лишних слов", text: "Она садится на край стола и спокойно смотрит сверху вниз, проверяя твои нервы." },
           { title: "Игра на твоих условиях", text: "Ставка сделана, и именно Рина решает, какой шаг будет следующим." }
@@ -841,6 +775,8 @@
         vibe: "sub",
         roleLabel: "Не доминирующая",
         desc: "Тихая, мягкая и податливая. Легко смущается, ждёт твоего решения и охотно следует за тобой.",
+        artPrompt: "anime girl portrait, soft shy gentle expression, big violet eyes, long dark hair, oversized dark hoodie, warm dim night lighting, detailed anime artwork",
+        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g3)"/><circle cx="100" cy="105" r="70" fill="#6366f1" opacity="0.25"/></svg>`,
         plots: [
           { title: "Тихая ночь после дождя", text: "Она сидит на диване в оверсайз-худи, чуть робея, и тихо ждёт, что ты скажешь первым." },
           { title: "Доверие без лишнего шума", text: "Приглушённый свет, спокойная обстановка — Мия полностью полагается на твой ход." }
@@ -852,6 +788,8 @@
         vibe: "sub",
         roleLabel: "Не доминирующая",
         desc: "Нежная, уступчивая и внимательная к деталям. Не спорит за лидерство, ей комфортно рядом с сильным партнёром.",
+        artPrompt: "anime girl portrait, sweet gentle expression, soft lavender eyes, silver-white hair, dark aesthetic outfit, soft evening light, high detail anime portrait",
+        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2e1065"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g4)"/><circle cx="100" cy="105" r="70" fill="#a855f7" opacity="0.22"/></svg>`,
         plots: [
           { title: "Поздний ужин на двоих", text: "На кухне тепло и тихо; Алиса поправляет рукав и мягко улыбается, ожидая твоих действий." },
           { title: "За кулисами съёмки", text: "Усталость после долгого дня, она прислоняется к стене и тихо смотрит на тебя." }
@@ -863,6 +801,8 @@
         vibe: "brat",
         roleLabel: "Дерзкая",
         desc: "Яркая, живая и прямолинейная. Подкалывает, шутит, но быстро становится искренней.",
+        artPrompt: "Marin Kitagawa anime portrait, playful cheeky expression, bright eyes, blonde hair with dark roots, trendy street style, night city lights, detailed anime art",
+        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#451a03"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g5)"/><circle cx="100" cy="105" r="70" fill="#f59e0b" opacity="0.22"/></svg>`,
         plots: [
           { title: "Примерка нового образа", text: "В комнате разложены ткани и реквизит, Марин крутится перед зеркалом и с ухмылкой смотрит на тебя." },
           { title: "Полночный перекус и разговоры", text: "Пустая кухня, две банки напитка и бесконечные истории до утра." }
@@ -874,11 +814,31 @@
         vibe: "brat",
         roleLabel: "Дерзкая",
         desc: "Колючая снаружи, но легко выдаёт эмоции, когда её задевают за живое.",
+        artPrompt: "anime girl portrait, bold bratty expression, amber eyes, messy dark hair, street jacket, night rooftop atmosphere, detailed anime art",
+        fallbackSvg: `<svg width="100%" height="100%" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#422006"/><stop offset="100%" stop-color="#07060b"/></linearGradient></defs><rect width="200" height="260" fill="url(#g6)"/><circle cx="100" cy="105" r="70" fill="#eab308" opacity="0.2"/></svg>`,
         plots: [
           { title: "Крыша ночного города", text: "Ветер треплет волосы, Юки скрещивает руки и бросает вызов: «И что дальше?»" }
         ]
       }
     ];
+
+    function getArtUrl(char) {
+      if (char.customImg) return char.customImg;
+      const basePrompt = char.artPrompt || `${char.name}, ${char.roleLabel} anime girl portrait, moody dark lighting, detailed anime art`;
+      const encoded = encodeURIComponent(basePrompt);
+      return `https://image.pollinations.ai/prompt/${encoded}?width=512&height=640&model=flux&nologo=true&seed=${encodeURIComponent(char.id)}`;
+    }
+
+    function getFallbackDataUrl(char) {
+      const svg = char.fallbackSvg || `<svg width="200" height="260" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="260" fill="#12101c"/></svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function buildImgTag(char, cls = "card-art", alt = "") {
+      const src = getArtUrl(char);
+      const fb = getFallbackDataUrl(char);
+      return `<img class="${cls}" src="${src}" alt="${alt || char.name}" loading="lazy" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='${fb}';}" />`;
+    }
 
     let currentFilter = "all";
     let activeChar = null;
@@ -913,7 +873,7 @@
       createTile.className = "card create-card";
       createTile.onclick = openCreate;
       createTile.innerHTML = `
-        <div class="card-bg">
+        <div class="create-bg">
           <svg class="anim-pulse" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8">
             <path d="M12 5v14M5 12h14"/>
           </svg>
@@ -922,7 +882,7 @@
         <div class="card-top"><span class="role-tag">Свой</span></div>
         <div class="card-body">
           <h4>Создать персонажа</h4>
-          <p>Задай характер, доминацию или мягкость и свой старт.</p>
+          <p>Характер, доминация или мягкость, арт и свой старт.</p>
         </div>
       `;
       grid.appendChild(createTile);
@@ -939,7 +899,7 @@
         tile.className = "card";
         tile.onclick = () => openChar(c);
         tile.innerHTML = `
-          <div class="card-bg">${renderCharAvatar(c.id, c.vibe, 92)}</div>
+          ${buildImgTag(c, "card-art", c.name)}
           <div class="card-grad"></div>
           <div class="card-top">
             <span class="role-tag ${c.vibe}">${c.roleLabel}</span>
@@ -960,8 +920,8 @@
       domOverride = "auto";
       updateDomPill();
 
-      document.getElementById("room-ava").innerHTML = renderCharAvatar(c.id, c.vibe, 42);
-      document.getElementById("picker-ava").innerHTML = renderCharAvatar(c.id, c.vibe, 58);
+      document.getElementById("room-ava").innerHTML = buildImgTag(c, "", c.name);
+      document.getElementById("picker-ava").innerHTML = buildImgTag(c, "", c.name);
       document.getElementById("room-name").textContent = c.name;
       document.getElementById("room-sub").textContent = `${c.roleLabel} · выбери сюжет`;
       document.getElementById("picker-title").textContent = `${c.name} · ${c.roleLabel}`;
@@ -1039,8 +999,9 @@
         document.getElementById("scene-picker").style.display = "none";
       }
       const last = history[history.length - 1]?.text || activePlot?.text || activeChar.desc;
-      const prompt = encodeURIComponent(last.slice(0, 110) + ", dark anime moody lighting, cinematic");
-      const url = `https://image.pollinations.ai/prompt/${prompt}?model=flux&nologo=true&t=${Date.now()}`;
+      const base = activeChar.artPrompt || `${activeChar.name}, ${activeChar.roleLabel}`;
+      const prompt = encodeURIComponent(`${base}, scene: ${last.slice(0, 90)}, moody lighting, detailed anime art`);
+      const url = `https://image.pollinations.ai/prompt/${prompt}?width=640&height=480&model=flux&nologo=true&t=${Date.now()}`;
 
       const probe = new Image();
       probe.onload = () => {
@@ -1054,7 +1015,7 @@
         window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
       };
       probe.onerror = () => {
-        addBubble("bot", "Генератор картинок сейчас на лимите или недоступен — продолжи сцену текстом или попробуй через минуту.");
+        addBubble("bot", "Генератор картинок сейчас на лимите — продолжи сцену текстом или попробуй позже.");
       };
       probe.src = url;
     }
@@ -1096,11 +1057,19 @@
     function saveCustomChar() {
       const name = document.getElementById("c-name").value.trim();
       const vibe = document.getElementById("c-vibe").value;
+      const look = document.getElementById("c-look").value.trim();
+      const customImg = document.getElementById("c-img").value.trim();
       const desc = document.getElementById("c-desc").value.trim() || "Свой персонаж.";
       const plotText = document.getElementById("c-plot").value.trim() || "Сцена начинается.";
       if (!name) return alert("Укажи имя");
 
       const labels = { dom: "Доминирующая", sub: "Не доминирующая", brat: "Дерзкая" };
+      const vibePrompt = {
+        dom: "dominant confident expression, dark moody lighting",
+        sub: "soft shy expression, gentle lighting",
+        brat: "playful bratty smirk, dramatic lighting"
+      };
+
       const item = {
         id: "custom_" + Date.now(),
         name,
@@ -1108,6 +1077,8 @@
         roleLabel: labels[vibe],
         desc,
         custom: true,
+        customImg: customImg || "",
+        artPrompt: `${name}, ${look || desc}, ${vibePrompt[vibe]}, detailed anime portrait`,
         plots: [{ title: "Стартовая сцена", text: plotText }]
       };
 
@@ -1116,6 +1087,8 @@
       localStorage.setItem("nocturne_custom_chars", JSON.stringify(custom));
 
       document.getElementById("c-name").value = "";
+      document.getElementById("c-look").value = "";
+      document.getElementById("c-img").value = "";
       document.getElementById("c-desc").value = "";
       document.getElementById("c-plot").value = "";
       closeAll();
