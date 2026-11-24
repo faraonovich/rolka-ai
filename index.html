@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Void RP Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-dark: #090412;
+      --bg-glow-1: rgba(139, 92, 246, 0.28);
+      --bg-glow-2: rgba(192, 38, 211, 0.18);
+      --glass: rgba(24, 14, 43, 0.58);
+      --glass-strong: rgba(34, 19, 61, 0.78);
+      --border: rgba(168, 85, 247, 0.28);
+      --accent: #a855f7;
+      --accent-bright: #c084fc;
+      --text: #f5f3ff;
+      --muted: #a79bc4;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 15%, var(--bg-glow-1), transparent 45%),
+        radial-gradient(circle at 85% 75%, var(--bg-glow-2), transparent 45%),
+        linear-gradient(160deg, #07030e 0%, #120724 55%, #090412 100%);
+      padding: 16px 14px 96px 14px;
+      overflow-x: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: linear-gradient(90deg, #fff, var(--accent-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.16);
+      border: 1px solid var(--border);
+      color: var(--accent-bright);
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .char-card {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .char-card.selected {
+      border-color: var(--accent-bright);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+      background: var(--glass-strong);
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(88,28,135,0.5));
+      border: 1px solid rgba(216, 180, 254, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .char-info h3 {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+    }
+    .char-info p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 6px 2px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: rgba(11, 6, 22, 0.72);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent-bright);
+    }
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    .seg-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: rgba(11, 6, 22, 0.65);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .seg-btn {
+      padding: 8px 6px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .seg-btn.active {
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      color: #fff;
+    }
+
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 2px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      margin-top: 14px;
+      padding: 13px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(168, 85, 247, 0.14);
+      border: 1px solid var(--border);
+      color: var(--accent-bright);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      background: rgba(20, 11, 38, 0.78);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+    }
+
+    .nav-item {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .nav-item.active {
+      color: var(--accent-bright);
+      font-weight: 600;
+    }
+    .nav-item span.icon {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">AURA RP</div>
+    <div class="badge" id="active-badge">Персонаж не выбран</div>
+  </div>
+
+  <!-- ВКЛАДКА 1: ПЕРСОНАЖИ -->
+  <div class="page active" id="page-chars">
+    <div id="chars-list"></div>
+    <button class="btn-primary" onclick="launchSession()">Начать / Обновить ролку</button>
+  </div>
+
+  <!-- ВКЛАДКА 2: СОЗДАТЬ ПЕРСОНАЖА -->
+  <div class="page" id="page-create">
+    <div class="card">
+      <h3 style="margin:0 0 8px 0;">Новый персонаж</h3>
+      <label>Имя персонажа</label>
+      <input id="c-name" placeholder="Например: Вектор / Кира" />
+
+      <label>Эмодзи-аватар</label>
+      <input id="c-avatar" value="🕶️" maxlength="4" />
+
+      <label>Характер и описание (внешность, манера речи)</label>
+      <textarea id="c-desc" placeholder="Холодный наемник, говорит кратко, замечает детали..."></textarea>
+
+      <label>Стартовая сцена / завязка</label>
+      <textarea id="c-intro" placeholder="Дождь барабанит по крыше заброшенного склада..."></textarea>
+
+      <button class="btn-secondary" onclick="saveCustomChar()">Сохранить в список персонажей</button>
+    </div>
+  </div>
+
+  <!-- ВКЛАДКА 3: НАСТРОЙКИ И ЧАТЫ -->
+  <div class="page" id="page-settings">
+    <div class="card">
+      <h3 style="margin:0 0 8px 0;">Параметры ролки</h3>
+
+      <label>Сюжет / сеттинг</label>
+      <select id="s-plot">
+        <option value="Тёмный реализм / криминал">Тёмный реализм / криминал</option>
+        <option value="Мрачное фэнтези">Мрачное фэнтези</option>
+        <option value="Киберпанк / техно-нуар">Киберпанк / техно-нуар</option>
+        <option value="Психологическая драма">Психологическая драма</option>
+        <option value="Повседневность / романтика">Повседневность / романтика</option>
+      </select>
+
+      <label>Жесткость сцен</label>
+      <div class="seg-group" id="hardness-group">
+        <button class="seg-btn" data-val="Лайт" onclick="setSeg('hardness', this)">Лайт</button>
+        <button class="seg-btn active" data-val="Средне" onclick="setSeg('hardness', this)">Средне</button>
+        <button class="seg-btn" data-val="Хардкор" onclick="setSeg('hardness', this)">Хардкор</button>
+      </div>
+
+      <div class="switch-row" style="margin-top:12px;">
+        <div>
+          <div style="font-size:14px;font-weight:600;">Мат в речи</div>
+          <div style="font-size:11px;color:var(--muted);">Разрешить нецензурную лексику</div>
+        </div>
+        <input type="checkbox" id="s-swearing" checked style="width:20px;height:20px;" />
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <div style="font-size:14px;font-weight:600;">Арт на каждую сцену</div>
+          <div style="font-size:11px;color:var(--muted);">Генерировать картинку вместе с ответом</div>
+        </div>
+        <input type="checkbox" id="s-autoimg" style="width:20px;height:20px;" />
+      </div>
+
+      <button class="btn-primary" onclick="launchSession()">Применить и запустить</button>
+    </div>
+  </div>
+
+  <!-- НИЖНЕЕ МЕНЮ -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-chars" onclick="switchTab('chars', this)">
+      <span class="icon">🎭</span>
+      <span>Персонажи</span>
+    </button>
+    <button class="nav-item" id="nav-create" onclick="switchTab('create', this)">
+      <span class="icon">✨</span>
+      <span>Создать</span>
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="switchTab('settings', this)">
+      <span class="icon">⚙️</span>
+      <span>Настройки</span>
+    </button>
+  </nav>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    const defaultChars = [
+      {
+        id: "night_warden",
+        name: "Ночной куратор",
+        avatar: "🟣",
+        desc: "Спокойный, расчетливый собеседник с легкой иронией. Отыгрывает действия в *звездочках*.",
+        intro: "Неоновый свет мигает за окном комнаты. Я откидываюсь на спинку кресла и смотрю на тебя: «Ну что, начнем?»"
+      },
+      {
+        id: "ash_runner",
+        name: "Эш — контрабандист",
+        avatar: "⚡",
+        desc: "Резкий, опытный уличный проводник, привыкший к рискам и ночным вылазкам.",
+        intro: "Двигатель глухо глохнет в переулке. Я поправляю ремень на плече: «У нас мало времени до патруля»."
+      }
+    ];
+
+    let hardness = "Средне";
+    let selectedCharId = defaultChars[0].id;
+
+    function getAllChars() {
+      const custom = JSON.parse(localStorage.getItem("rp_custom_chars") || "[]");
+      return [...defaultChars, ...custom];
+    }
+
+    function renderChars() {
+      const list = document.getElementById("chars-list");
+      const chars = getAllChars();
+      list.innerHTML = "";
+
+      chars.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "card char-card" + (c.id === selectedCharId ? " selected" : "");
+        div.onclick = () => {
+          selectedCharId = c.id;
+          updateBadge();
+          renderChars();
+        };
+        div.innerHTML = `
+          <div class="avatar">${c.avatar || "🎭"}</div>
+          <div class="char-info">
+            <h3>${c.name}</h3>
+            <p>${c.desc}</p>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+      updateBadge();
+    }
+
+    function updateBadge() {
+      const ch = getAllChars().find(x => x.id === selectedCharId);
+      document.getElementById("active-badge").textContent = ch ? `${ch.avatar} ${ch.name}` : "Выбор";
+    }
+
+    function saveCustomChar() {
+      const name = document.getElementById("c-name").value.trim();
+      const avatar = document.getElementById("c-avatar").value.trim() || "🎭";
+      const desc = document.getElementById("c-desc").value.trim();
+      const intro = document.getElementById("c-intro").value.trim() || "Сцена начинается.";
+
+      if (!name || !desc) {
+        alert("Укажи имя и описание персонажа.");
+        return;
+      }
+
+      const custom = JSON.parse(localStorage.getItem("rp_custom_chars") || "[]");
+      const newChar = {
+        id: "custom_" + Date.now(),
+        name,
+        avatar,
+        desc,
+        intro
+      };
+      custom.push(newChar);
+      localStorage.setItem("rp_custom_chars", JSON.stringify(custom));
+      selectedCharId = newChar.id;
+
+      document.getElementById("c-name").value = "";
+      document.getElementById("c-desc").value = "";
+      document.getElementById("c-intro").value = "";
+
+      switchTab("chars", document.getElementById("nav-chars"));
+      renderChars();
+    }
+
+    function setSeg(type, btn) {
+      btn.parentElement.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      if (type === "hardness") hardness = btn.dataset.val;
+    }
+
+    function switchTab(tab, el) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById("page-" + tab).classList.add("active");
+
+      document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+      el.classList.add("active");
+    }
+
+    function launchSession() {
+      const charObj = getAllChars().find(x => x.id === selectedCharId) || defaultChars[0];
+      const payload = {
+        character: charObj,
+        plot: document.getElementById("s-plot").value,
+        hardness: hardness,
+        swearing: document.getElementById("s-swearing").checked,
+        auto_img: document.getElementById("s-autoimg").checked
+      };
+
+      if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(payload));
+      } else {
+        console.log("Payload:", payload);
+        alert("Открой страницу внутри Telegram Mini App для передачи данных боту.");
+      }
+    }
+
+    renderChars();
+  </script>
+</body>
+</html>
